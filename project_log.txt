@@ -1,0 +1,57 @@
+# Image Processor - Project Log
+
+## Step 1: Project Initialization and Setup
+- **Date**: 2026-05-08
+- **Action**: Created a new React + TypeScript project using Vite.
+- **Reasoning**: Vite provides a fast, modern build tool for React projects. TypeScript adds strong typing to prevent runtime errors and improve developer experience.
+- **Commands Executed**: 
+  - `npx -y create-vite . --template react-ts --no-interactive`
+  - `npm install`
+
+## Step 2: Dependency Installation
+- **Action**: Installed Tailwind CSS (v3 for config support), Zustand, and Lucide React.
+
+## Step 3: Folder Structure
+- **Action**: Created specific folders in `src/`.
+
+## Step 4: Core Types Definition
+- **Action**: Defined interfaces in `src/types/image.types.ts`.
+
+## Step 5: Tailwind Configuration
+- **Action**: Configured Tailwind for dark mode and default background.
+
+## Step 6: Core Image Algorithms
+- **Date**: 2026-05-08
+- **Action**: Created `src/core/algorithms/pixelMatrix.ts`.
+- **Reasoning**: To safely manipulate image data, we need pure helper functions that convert between browser `ImageData` and our custom `PixelMatrix` type. Added helpers to clone matrices, get and set pixels safely with bounds checking to prevent out-of-bounds crashes during filters.
+
+## Step 7: Global State Management (Zustand)
+- **Action**: Created `src/store/imageStore.ts`.
+- **Reasoning**: We need a central place to hold the current image data, its dimensions, and the undo/redo history. Zustand lets us create a robust, globally accessible store with built-in actions (`loadImage`, `applyOperation`, `undo`, `redo`, `resetToOriginal`). The `loadImage` action extracts the pixel data via an offscreen canvas.
+
+## Step 8: Temporary UI for Testing
+- **Action**: Updated `App.tsx`.
+- **Reasoning**: Added an upload button and wired it to the store to verify the `loadImage` action works and successfully calculates the image dimensions.
+
+## Step 9: Interactive Canvas Viewport
+- **Date**: 2026-05-08
+- **Action**: Created `src/components/canvas/CanvasViewport.tsx` and `CanvasContainer.tsx`. Updated `App.tsx`.
+- **Reasoning**: To visually interact with the pixel data, we need a high-performance rendering surface. The `CanvasViewport` listens for changes to the Zustand store and draws the raw `PixelMatrix` back to an HTML canvas using `putImageData`. Added mouse event handlers to smoothly zoom and pan the canvas using CSS transforms, maintaining pixel-perfect accuracy. The `CanvasContainer` acts as a smart wrapper that shows a beautiful dashed dropzone when no image is loaded.
+
+## Step 10: Pure Adjustment Algorithms
+- **Date**: 2026-05-08
+- **Action**: Created `src/core/filters/adjustments.ts`.
+- **Reasoning**: Implemented pure functions for Brightness, Contrast, and Saturation. These functions take an input matrix and a value (-100 to 100), apply the standard math (like HSL conversion for saturation), clamp the outputs, and return a *new* cloned matrix to respect our immutable state requirement.
+
+## Step 11: Reusable UI Components
+- **Action**: Created `src/components/ui/Slider.tsx`.
+- **Reasoning**: Created a styled generic slider component to ensure UI consistency.
+
+## Step 12: Collapsible Toolbar
+- **Action**: Created `src/components/toolbar/Toolbar.tsx` and updated `App.tsx`.
+- **Reasoning**: Built the left sidebar layout containing collapsible accordion sections for Adjustments, Transforms, Filters, and Export. Wired the Brightness, Contrast, and Saturation sliders directly to the adjustment pure functions and the `applyOperation` action in the store for real-time canvas updates.
+
+## Step 13: Non-Destructive Live Previews
+- **Date**: 2026-05-08
+- **Action**: Updated `imageStore.ts`, `CanvasViewport.tsx`, and `Toolbar.tsx`.
+- **Reasoning**: Fixed a critical bug where dragging sliders continuously appended new filters to the `currentMatrix`, permanently destroying the original image data and flooding the undo stack. Added a `previewMatrix` to the store so users can drag sliders in real-time non-destructively. Added "Apply" and "Cancel" buttons to the Adjustments panel to explicitly commit or discard the operations.
