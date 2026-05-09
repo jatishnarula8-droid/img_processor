@@ -18,6 +18,8 @@ interface ImageStoreState {
   previewMatrix: PixelMatrix | null;
   
   zoom: number;
+  pan: { x: number; y: number };
+  isCropping: boolean;
   isExportPanelOpen: boolean;
   isBatchPanelOpen: boolean;
   isShortcutsPanelOpen: boolean;

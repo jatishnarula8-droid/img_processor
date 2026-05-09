@@ -4,7 +4,7 @@ import { useImageStore } from '../../store/imageStore';
 import { matrixToImageData } from '../../core/algorithms/pixelMatrix';
 
 export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOriginal }) => {
-  const { currentMatrix, originalMatrix, previewMatrix, imageWidth, imageHeight, isProcessing, zoom, pan, setZoom, setPan } = useImageStore();
+  const { currentMatrix, originalMatrix, previewMatrix, imageWidth, imageHeight, isProcessing, zoom, pan, isCropping, setZoom, setPan } = useImageStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const [isPanning, setIsPanning] = useState(false);
@@ -25,29 +25,27 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
   }, [activeMatrix]);
 
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    // We shouldn't strictly preventDefault in React synthetic wheel events usually, 
-    // but the container doesn't have overflow anyway.
+    if (isCropping) return;
     const zoomFactor = 1.1;
     setZoom((prevZoom) => {
       let newZoom = prevZoom;
       if (e.deltaY < 0) {
-        newZoom = prevZoom * zoomFactor; // Scroll up -> zoom in
+        newZoom = prevZoom * zoomFactor;
       } else {
-        newZoom = prevZoom / zoomFactor; // Scroll down -> zoom out
+        newZoom = prevZoom / zoomFactor;
       }
-      return Math.min(Math.max(newZoom, 0.1), 10); // Clamp between 0.1 and 10
+      return Math.min(Math.max(newZoom, 0.1), 10);
     });
   };
 
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    // Only allow panning with middle click or if we want to explicitly drag.
-    // Wait, the previous implementation just panned on any mousedown.
+    if (isCropping) return;
     setIsPanning(true);
     setStartPanPosition({ x: e.clientX - pan.x, y: e.clientY - pan.y });
   };
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isPanning) return;
+    if (isCropping || !isPanning) return;
     setPan({
       x: e.clientX - startPanPosition.x,
       y: e.clientY - startPanPosition.y,

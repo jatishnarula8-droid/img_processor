@@ -145,6 +145,7 @@ export const CropOverlay: React.FC = () => {
                 left: renderBox.left + renderBox.width / 2 - 40, 
                 top: renderBox.top + renderBox.height + 10 
               }}
+              onMouseDown={(e) => e.stopPropagation()}
             >
               <button onClick={confirmCrop} className="p-1.5 hover:bg-green-600/20 text-green-500 rounded transition-colors">
                 <Check className="w-4 h-4" />
