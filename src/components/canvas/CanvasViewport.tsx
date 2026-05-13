@@ -4,8 +4,9 @@ import { useImageStore } from '../../store/imageStore';
 import { matrixToImageData } from '../../core/algorithms/pixelMatrix';
 
 export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOriginal }) => {
-  const { currentMatrix, originalMatrix, previewMatrix, imageWidth, imageHeight, isProcessing, zoom, pan, isCropping, setZoom, setPan, isRemovingBackground } = useImageStore();
+  const { currentMatrix, originalMatrix, previewMatrix, imageWidth, imageHeight, isProcessing, zoom, pan, isCropping, setZoom, setPan, isRemovingBackground, filename } = useImageStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   
   const [isPanning, setIsPanning] = useState(false);
   const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
@@ -13,6 +14,21 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
   const activeMatrix = showOriginal ? originalMatrix : (previewMatrix || currentMatrix);
   const activeWidth = activeMatrix?.[0]?.length || imageWidth;
   const activeHeight = activeMatrix?.length || imageHeight;
+
+  useEffect(() => {
+    if (filename && viewportRef.current && activeWidth && activeHeight) {
+      const viewportWidth = viewportRef.current.clientWidth;
+      const viewportHeight = viewportRef.current.clientHeight;
+      const margin = 40;
+      const zoomX = (viewportWidth - margin) / activeWidth;
+      const zoomY = (viewportHeight - margin) / activeHeight;
+      const newZoom = Math.max(0.1, Math.min(zoomX, zoomY, 1));
+      setZoom(newZoom);
+      setPan({ x: 0, y: 0 });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filename]);
+
 
   useEffect(() => {
     if (activeMatrix && canvasRef.current) {
@@ -24,19 +40,7 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
     }
   }, [activeMatrix]);
 
-  const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    if (isCropping) return;
-    const zoomFactor = 1.1;
-    setZoom((prevZoom) => {
-      let newZoom = prevZoom;
-      if (e.deltaY < 0) {
-        newZoom = prevZoom * zoomFactor;
-      } else {
-        newZoom = prevZoom / zoomFactor;
-      }
-      return Math.min(Math.max(newZoom, 0.1), 10);
-    });
-  };
+
 
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (isCropping) return;
@@ -58,8 +62,8 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
 
   return (
     <div 
+      ref={viewportRef}
       className={`w-full h-full relative overflow-hidden bg-transparent flex items-center justify-center ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
-      onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUpOrLeave}

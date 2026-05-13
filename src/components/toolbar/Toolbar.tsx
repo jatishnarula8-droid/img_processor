@@ -50,7 +50,7 @@ export const Toolbar: React.FC = () => {
   const { 
     currentMatrix, applyOperation, setPreview, undo, undoStack, 
     isCropping, toggleCropping, autoEnhance, isProcessing,
-    activeTool, setActiveTool
+    activeTool, setActiveTool, zoom, setZoom
   } = useImageStore();
   
   const [brightness, setBrightness] = useState(0);
@@ -197,6 +197,15 @@ export const Toolbar: React.FC = () => {
             </button>
           </div>
         )}
+      </Section>
+
+      <Section title="View Controls" icon={Maximize} defaultOpen={true}>
+        <div className="space-y-2">
+          <Slider 
+            label="Magnification" min={0.1} max={5} step={0.1} value={zoom} 
+            onChange={(val) => setZoom(val)} onReset={zoom !== 1 ? () => setZoom(1) : undefined} 
+          />
+        </div>
       </Section>
 
       <Section title="AI Tools" icon={Scissors} defaultOpen={false}>
