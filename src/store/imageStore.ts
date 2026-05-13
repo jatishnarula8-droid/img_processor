@@ -51,6 +51,7 @@ interface ImageStoreState {
   undo: () => void;
   redo: () => void;
   resetToOriginal: () => void;
+  clearImage: () => void;
   autoEnhance: () => Promise<void>;
 }
 
@@ -221,6 +222,25 @@ export const useImageStore = create<ImageStoreState>((set, get) => ({
       zoom: 1,
       pan: { x: 0, y: 0 },
       isCropping: false,
+    });
+  },
+
+  clearImage: () => {
+    set({
+      originalMatrix: null,
+      currentMatrix: null,
+      imageWidth: 0,
+      imageHeight: 0,
+      filename: null,
+      fileSize: null,
+      undoStack: [],
+      redoStack: [],
+      previewMatrix: null,
+      zoom: 1,
+      pan: { x: 0, y: 0 },
+      isCropping: false,
+      activeTool: null,
+      backgroundRemovedImage: null,
     });
   },
 

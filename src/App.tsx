@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Undo2, Redo2, Download, Image as ImageIcon, Layers, SplitSquareHorizontal } from 'lucide-react';
+import { Undo2, Redo2, Download, Image as ImageIcon, Layers, SplitSquareHorizontal, Trash2 } from 'lucide-react';
 import { CanvasContainer } from './components/canvas/CanvasContainer';
 import { Toolbar } from './components/toolbar/Toolbar';
 import { RightPanel } from './components/panels/RightPanel';
@@ -21,7 +21,8 @@ export default function App() {
     isBatchPanelOpen,
     setBatchPanelOpen,
     isShortcutsPanelOpen,
-    setShortcutsPanelOpen
+    setShortcutsPanelOpen,
+    clearImage
   } = useImageStore();
 
   const [showOriginal, setShowOriginal] = useState(false);
@@ -105,6 +106,17 @@ export default function App() {
                 <span>Batch</span>
               </button>
             </Tooltip>
+
+            {currentMatrix && (
+              <Tooltip content="Delete current image">
+                <button 
+                  onClick={clearImage}
+                  className="flex items-center space-x-2.5 px-4 py-2.5 btn-secondary text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 text-[11px] font-bold uppercase tracking-widest transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            )}
 
             <Tooltip content="Save high-quality output">
               <button 
