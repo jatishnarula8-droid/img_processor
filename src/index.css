@@ -105,3 +105,8 @@
 .animate-scan-line {
   animation: scan-line 2.5s linear infinite;
 }
+
+.mask-edges {
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}

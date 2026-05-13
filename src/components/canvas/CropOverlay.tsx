@@ -23,6 +23,72 @@ const ASPECT_RATIOS = [
   { label: '2:1', ratio: 2/1 },
 ];
 
+const RotationSlider: React.FC<{ value: number, onChange: (v: number) => void }> = ({ value, onChange }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const startXRef = useRef(0);
+  const startValRef = useRef(0);
+
+  const handleMouseDown = (e: ReactMouseEvent) => {
+    e.stopPropagation();
+    setIsDragging(true);
+    startXRef.current = e.clientX;
+    startValRef.current = value;
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startXRef.current;
+      // 7 pixels per degree to perfectly track the finger (1px line + 6px space)
+      // Subtracting dx to make dragging left rotate clockwise (standard UX)
+      let newVal = startValRef.current - dx / 7;
+      newVal = Math.max(-45, Math.min(45, newVal)); // removed Math.round for smoother internal tracking
+      onChange(newVal);
+    };
+    const handleMouseUp = () => setIsDragging(false);
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+  }, [isDragging, onChange]);
+
+  return (
+    <div className="flex flex-col items-center select-none pointer-events-auto" onMouseDown={(e) => e.stopPropagation()}>
+      <span className="text-[11px] text-zinc-300 font-mono mb-2 drop-shadow-md">{Math.round(value)} °</span>
+      <div 
+        ref={containerRef}
+        className="w-64 h-8 relative flex items-center justify-center cursor-ew-resize overflow-hidden mask-edges"
+        onMouseDown={handleMouseDown}
+      >
+        <div 
+          className="flex items-center space-x-[6px] absolute"
+          style={{ transform: `translateX(${-value * 7}px)` }}
+        >
+          {Array.from({length: 91}).map((_, i) => {
+            const val = i - 45;
+            const isCenter = val === 0;
+            const isMajor = Math.abs(val) % 10 === 0;
+            return (
+              <div 
+                key={i} 
+                className={`w-[1px] rounded-full ${isCenter ? 'h-6 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]' : isMajor ? 'h-3 bg-zinc-400' : 'h-1.5 bg-zinc-600'}`} 
+              />
+            )
+          })}
+        </div>
+        {/* Center fixed indicator */}
+        <div className="absolute w-[3px] h-6 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,1)]" />
+      </div>
+    </div>
+  )
+}
+
 export const CropOverlay: React.FC = () => {
   const { currentMatrix, imageWidth, imageHeight, zoom, pan, isCropping, toggleCropping, applyOperation } = useImageStore();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -33,6 +99,9 @@ export const CropOverlay: React.FC = () => {
   const [endX, setEndX] = useState(0);
   const [endY, setEndY] = useState(0);
   const [activeRatio, setActiveRatio] = useState<number>(0);
+  const [rotationAngle, setRotationAngle] = useState<number>(0);
+  const { setPreview } = useImageStore.getState();
+  const rotationTimeout = useRef<NodeJS.Timeout | null>(null);
 
   if (!isCropping || !currentMatrix) return null;
 
@@ -117,26 +186,54 @@ export const CropOverlay: React.FC = () => {
     setEndY(y);
   };
 
+  const handleRotationChange = (angle: number) => {
+    setRotationAngle(angle);
+    if (rotationTimeout.current) clearTimeout(rotationTimeout.current);
+    rotationTimeout.current = setTimeout(async () => {
+      if (angle !== 0) {
+        const { rotateMatrix } = await import('../../core/transforms/geometric');
+        setPreview(rotateMatrix(currentMatrix, angle));
+      } else {
+        setPreview(null);
+      }
+    }, 100);
+  };
+
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  const confirmCrop = () => {
+  const confirmCrop = async () => {
+    let finalMatrix = currentMatrix;
+    
+    // Apply rotation first if exists
+    if (rotationAngle !== 0) {
+      const { rotateMatrix } = await import('../../core/transforms/geometric');
+      finalMatrix = rotateMatrix(currentMatrix, rotationAngle);
+    }
+
     const box: BoundingBox = {
       x: Math.max(0, Math.min(startX, endX)),
       y: Math.max(0, Math.min(startY, endY)),
-      width: Math.min(imageWidth, Math.abs(endX - startX)),
-      height: Math.min(imageHeight, Math.abs(endY - startY))
+      width: Math.min(finalMatrix[0].length, Math.abs(endX - startX)),
+      height: Math.min(finalMatrix.length, Math.abs(endY - startY))
     };
     
     if (box.width > 0 && box.height > 0) {
-      const result = cropMatrix(currentMatrix, box);
-      applyOperation('Crop', result);
+      const result = cropMatrix(finalMatrix, box);
+      applyOperation('Crop & Rotate', result);
+    } else if (rotationAngle !== 0) {
+      applyOperation('Rotate', finalMatrix);
     }
+    
+    setPreview(null);
+    setRotationAngle(0);
     toggleCropping();
   };
 
   const cancelCrop = () => {
+    setPreview(null);
+    setRotationAngle(0);
     toggleCropping();
   };
 
@@ -224,36 +321,42 @@ export const CropOverlay: React.FC = () => {
         </>
       )}
 
-      {/* Aspect Ratio Toolbar */}
+      {/* Rotation and Aspect Ratio Container */}
       <div 
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#0c0c0e]/95 backdrop-blur-xl border border-white/10 p-2 rounded-2xl flex items-center shadow-2xl max-w-[90vw] pointer-events-auto overflow-hidden"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-6 pointer-events-auto"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 px-1">
-          {ASPECT_RATIOS.map((ar) => (
-            <button 
-              key={ar.label}
-              onClick={() => { setActiveRatio(ar.ratio); applyRatio(ar.ratio); }}
-              className={`flex flex-col items-center justify-center w-14 h-14 shrink-0 rounded-xl transition-all duration-200 ${
-                activeRatio === ar.ratio 
-                  ? 'bg-indigo-600/20 text-indigo-400 shadow-inner border border-indigo-500/30' 
-                  : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-200'
-              }`}
-            >
-              <div 
-                className={`mb-1.5 border-2 rounded-[3px] transition-all duration-200 ${activeRatio === ar.ratio ? 'border-indigo-400' : 'border-zinc-500'}`}
-                style={{ 
-                  width: '18px',
-                  height: ar.ratio === 0 ? '18px' : (ar.ratio === -1 ? `${18 / (imageWidth / imageHeight)}px` : `${18 / ar.ratio}px`),
-                  maxHeight: '18px',
-                  maxWidth: '18px',
-                  aspectRatio: ar.ratio === 0 ? '1/1' : (ar.ratio === -1 ? `${imageWidth}/${imageHeight}` : `${ar.ratio}`),
-                  borderStyle: ar.ratio === 0 ? 'dashed' : 'solid',
-                }} 
-              />
-              <span className="text-[9px] font-black tracking-widest">{ar.label}</span>
-            </button>
-          ))}
+        {/* Rotation Slider */}
+        <RotationSlider value={rotationAngle} onChange={handleRotationChange} />
+
+        {/* Aspect Ratio Toolbar */}
+        <div className="bg-[#0c0c0e]/95 backdrop-blur-xl border border-white/10 p-2 rounded-2xl flex items-center shadow-2xl max-w-[90vw] overflow-hidden">
+          <div className="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 px-1">
+            {ASPECT_RATIOS.map((ar) => (
+              <button 
+                key={ar.label}
+                onClick={() => { setActiveRatio(ar.ratio); applyRatio(ar.ratio); }}
+                className={`flex flex-col items-center justify-center w-14 h-14 shrink-0 rounded-xl transition-all duration-200 ${
+                  activeRatio === ar.ratio 
+                    ? 'bg-indigo-600/20 text-indigo-400 shadow-inner border border-indigo-500/30' 
+                    : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-200'
+                }`}
+              >
+                <div 
+                  className={`mb-1.5 border-2 rounded-[3px] transition-all duration-200 ${activeRatio === ar.ratio ? 'border-indigo-400' : 'border-zinc-500'}`}
+                  style={{ 
+                    width: '18px',
+                    height: ar.ratio === 0 ? '18px' : (ar.ratio === -1 ? `${18 / (imageWidth / imageHeight)}px` : `${18 / ar.ratio}px`),
+                    maxHeight: '18px',
+                    maxWidth: '18px',
+                    aspectRatio: ar.ratio === 0 ? '1/1' : (ar.ratio === -1 ? `${imageWidth}/${imageHeight}` : `${ar.ratio}`),
+                    borderStyle: ar.ratio === 0 ? 'dashed' : 'solid',
+                  }} 
+                />
+                <span className="text-[9px] font-black tracking-widest">{ar.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
