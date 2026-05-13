@@ -4,6 +4,7 @@ import { Check, X } from 'lucide-react';
 import { useImageStore } from '../../store/imageStore';
 import { cropMatrix } from '../../core/transforms/geometric';
 import type { BoundingBox } from '../../types/image.types';
+import Dock from '../ui/Dock';
 
 const ASPECT_RATIOS = [
   { label: 'Free', ratio: 0 },
@@ -329,21 +330,18 @@ export const CropOverlay: React.FC = () => {
         {/* Rotation Slider */}
         <RotationSlider value={rotationAngle} onChange={handleRotationChange} />
 
-        {/* Aspect Ratio Toolbar */}
-        <div className="bg-[#0c0c0e]/95 backdrop-blur-xl border border-white/10 p-2 rounded-2xl flex items-center shadow-2xl max-w-[90vw] overflow-hidden">
-          <div className="flex items-center space-x-1 overflow-x-auto custom-scrollbar pb-1 px-1">
-            {ASPECT_RATIOS.map((ar) => (
-              <button 
-                key={ar.label}
-                onClick={() => { setActiveRatio(ar.ratio); applyRatio(ar.ratio); }}
-                className={`flex flex-col items-center justify-center w-14 h-14 shrink-0 rounded-xl transition-all duration-200 ${
-                  activeRatio === ar.ratio 
-                    ? 'bg-indigo-600/20 text-indigo-400 shadow-inner border border-indigo-500/30' 
-                    : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-200'
-                }`}
-              >
+        {/* Aspect Ratio Toolbar as Dock */}
+        <div className="pointer-events-auto max-w-[95vw] overflow-x-auto overflow-y-visible custom-scrollbar pb-6 pt-8 -mt-8 flex justify-center">
+          <Dock 
+            items={ASPECT_RATIOS.map((ar) => ({
+              label: ar.label, // Tooltip on hover
+              onClick: () => { setActiveRatio(ar.ratio); applyRatio(ar.ratio); },
+              className: activeRatio === ar.ratio 
+                ? '!bg-indigo-600/30 !border-indigo-500/50' 
+                : '!bg-zinc-900/50 !border-white/5 hover:!bg-white/10',
+              icon: (
                 <div 
-                  className={`mb-1.5 border-2 rounded-[3px] transition-all duration-200 ${activeRatio === ar.ratio ? 'border-indigo-400' : 'border-zinc-500'}`}
+                  className={`border-2 rounded-[3px] transition-all duration-200 ${activeRatio === ar.ratio ? 'border-indigo-400' : 'border-zinc-500'}`}
                   style={{ 
                     width: '18px',
                     height: ar.ratio === 0 ? '18px' : (ar.ratio === -1 ? `${18 / (imageWidth / imageHeight)}px` : `${18 / ar.ratio}px`),
@@ -353,10 +351,12 @@ export const CropOverlay: React.FC = () => {
                     borderStyle: ar.ratio === 0 ? 'dashed' : 'solid',
                   }} 
                 />
-                <span className="text-[9px] font-black tracking-widest">{ar.label}</span>
-              </button>
-            ))}
-          </div>
+              )
+            }))}
+            panelHeight={74}
+            baseItemSize={58}
+            magnification={85}
+          />
         </div>
       </div>
     </div>
