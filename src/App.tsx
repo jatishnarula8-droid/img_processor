@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Undo2, Redo2, Download, Image as ImageIcon, Layers, SplitSquareHorizontal, Trash2 } from 'lucide-react';
+import { Undo2, Redo2, Download, Image as ImageIcon, Layers, SplitSquareHorizontal, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
 import { CanvasContainer } from './components/canvas/CanvasContainer';
 import { Toolbar } from './components/toolbar/Toolbar';
 import { RightPanel } from './components/panels/RightPanel';
@@ -23,7 +23,9 @@ export default function App() {
     setBatchPanelOpen,
     isShortcutsPanelOpen,
     setShortcutsPanelOpen,
-    clearImage
+    clearImage,
+    zoom,
+    setZoom
   } = useImageStore();
 
   const [showOriginal, setShowOriginal] = useState(false);
@@ -83,6 +85,30 @@ export default function App() {
               <Tooltip content="Redo (Ctrl+Shift+Z)">
                 <button onClick={redo} disabled={redoStack.length === 0} className="p-2.5 btn-ghost disabled:opacity-20 disabled:cursor-not-allowed">
                   <Redo2 className="w-4 h-4" />
+                </button>
+              </Tooltip>
+            </div>
+
+            <div className="h-8 w-[1px] bg-white/[0.06]" />
+
+            <div className="flex items-center space-x-1 bg-zinc-900/50 p-1 rounded-xl border border-white/5">
+              <Tooltip content="Zoom Out">
+                <button 
+                  onClick={() => setZoom(z => Math.max(0.05, z - 0.2))} 
+                  className="p-1.5 btn-ghost hover:bg-white/10"
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+              </Tooltip>
+              <div className="w-12 text-center text-[10px] font-bold text-zinc-300 font-mono select-none">
+                {Math.round(zoom * 100)}%
+              </div>
+              <Tooltip content="Zoom In">
+                <button 
+                  onClick={() => setZoom(z => Math.min(20, z + 0.2))} 
+                  className="p-1.5 btn-ghost hover:bg-white/10"
+                >
+                  <ZoomIn className="w-4 h-4" />
                 </button>
               </Tooltip>
             </div>

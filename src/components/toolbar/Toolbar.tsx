@@ -199,14 +199,7 @@ export const Toolbar: React.FC = () => {
         )}
       </Section>
 
-      <Section title="View Controls" icon={Maximize} defaultOpen={true}>
-        <div className="space-y-2">
-          <Slider 
-            label="Magnification" min={0.1} max={5} step={0.1} value={zoom} 
-            onChange={(val) => setZoom(val)} onReset={zoom !== 1 ? () => setZoom(1) : undefined} 
-          />
-        </div>
-      </Section>
+
 
       <Section title="AI Tools" icon={Scissors} defaultOpen={false}>
         <button 

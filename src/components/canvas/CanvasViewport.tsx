@@ -60,6 +60,12 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
     setIsPanning(false);
   };
 
+  const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
+    if (isCropping) return;
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    setZoom((prev) => Math.max(0.05, Math.min(20, prev * zoomFactor)));
+  };
+
   return (
     <div 
       ref={viewportRef}
@@ -68,6 +74,7 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUpOrLeave}
       onMouseLeave={handleMouseUpOrLeave}
+      onWheel={handleWheel}
     >
       <div
         style={{
