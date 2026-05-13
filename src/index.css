@@ -88,3 +88,20 @@
   animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.animate-scan {
+  animation: scan 2.5s linear infinite;
+}
+
+@keyframes scan-line {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+.animate-scan-line {
+  animation: scan-line 2.5s linear infinite;
+}

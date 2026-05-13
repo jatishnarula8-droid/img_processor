@@ -4,7 +4,7 @@ import { useImageStore } from '../../store/imageStore';
 import { matrixToImageData } from '../../core/algorithms/pixelMatrix';
 
 export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOriginal }) => {
-  const { currentMatrix, originalMatrix, previewMatrix, imageWidth, imageHeight, isProcessing, zoom, pan, isCropping, setZoom, setPan } = useImageStore();
+  const { currentMatrix, originalMatrix, previewMatrix, imageWidth, imageHeight, isProcessing, zoom, pan, isCropping, setZoom, setPan, isRemovingBackground } = useImageStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const [isPanning, setIsPanning] = useState(false);
@@ -65,21 +65,33 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
       onMouseUp={handleMouseUpOrLeave}
       onMouseLeave={handleMouseUpOrLeave}
     >
-      <canvas
-        ref={canvasRef}
-        width={activeWidth}
-        height={activeHeight}
+      <div
         style={{
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: 'center center',
-          // We disable transition while panning for immediate 1:1 mouse tracking
           transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+          width: activeWidth,
+          height: activeHeight,
         }}
-        className="shadow-2xl max-w-none rendering-pixelated"
-      />
-      {isProcessing && (
-        <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center z-50">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+        className="relative shadow-2xl"
+      >
+        <canvas
+          ref={canvasRef}
+          width={activeWidth}
+          height={activeHeight}
+          className="rendering-pixelated absolute inset-0"
+        />
+        {isRemovingBackground && (
+          <div className="absolute inset-0 z-50 overflow-hidden bg-indigo-900/10 backdrop-brightness-110">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/20 to-transparent w-full h-[200%] animate-scan" />
+            <div className="absolute left-0 right-0 h-0.5 bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,1)] animate-scan-line" />
+          </div>
+        )}
+      </div>
+
+      {isProcessing && !isRemovingBackground && (
+        <div className="absolute inset-0 bg-[#09090b]/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
         </div>
       )}
     </div>
