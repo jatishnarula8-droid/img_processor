@@ -8,6 +8,7 @@ import { BatchPanel } from './components/panels/BatchPanel';
 import { ShortcutsModal } from './components/modals/ShortcutsModal';
 import { useImageStore } from './store/imageStore';
 import { Tooltip } from './components/ui/Tooltip';
+import ClickSpark from './components/ui/ClickSpark';
 
 export default function App() {
   const { 
@@ -44,8 +45,15 @@ export default function App() {
   }, [undo, redo, isShortcutsPanelOpen, setShortcutsPanelOpen]);
 
   return (
-    <div className="flex h-screen bg-[#09090b] text-zinc-100 overflow-hidden font-sans selection:bg-indigo-500/30">
-      {/* Accent top border */}
+    <ClickSpark
+      sparkColor="#ffffff"
+      sparkSize={10}
+      sparkRadius={15}
+      sparkCount={8}
+      duration={400}
+    >
+      <div className="flex h-screen bg-[#09090b] text-zinc-100 overflow-hidden font-sans selection:bg-indigo-500/30">
+        {/* Accent top border */}
       <div className="fixed top-0 left-0 right-0 h-[1px] bg-indigo-500/30 z-50 animate-pulse-soft" />
       
       <Toolbar />
@@ -140,6 +148,7 @@ export default function App() {
       <ExportPanel isOpen={isExportPanelOpen} onClose={() => setExportPanelOpen(false)} />
       <BatchPanel isOpen={isBatchPanelOpen} onClose={() => setBatchPanelOpen(false)} />
       <ShortcutsModal isOpen={isShortcutsPanelOpen} onClose={() => setShortcutsPanelOpen(false)} />
-    </div>
+      </div>
+    </ClickSpark>
   );
 }
