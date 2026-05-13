@@ -15,6 +15,18 @@ export const CanvasContainer: React.FC<{ showOriginal?: boolean }> = ({ showOrig
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      await loadImage(file);
+    }
+  };
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#09090b] relative overflow-hidden">
       {/* Checkerboard Background */}
@@ -24,6 +36,8 @@ export const CanvasContainer: React.FC<{ showOriginal?: boolean }> = ({ showOrig
       {!currentMatrix ? (
         <div 
           onClick={() => fileInputRef.current?.click()}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
           className="relative group cursor-pointer"
         >
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
