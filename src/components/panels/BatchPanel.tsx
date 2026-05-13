@@ -134,79 +134,84 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   const progress = jobs.length > 0 ? (completed / jobs.length) * 100 : 0;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6 animate-in fade-in duration-300">
-      <div className="bg-[#121214] border border-zinc-800/60 rounded-3xl shadow-2xl w-full max-w-5xl h-[85vh] overflow-hidden flex flex-col scale-in-95 animate-in duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-6 animate-in fade-in duration-500">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2.5rem] shadow-2xl w-full max-w-6xl h-[85vh] overflow-hidden flex flex-col scale-in-95 animate-in duration-500">
         {/* Header */}
-        <div className="px-8 py-6 border-b border-zinc-800/60 flex justify-between items-center bg-zinc-900/40 shrink-0">
-          <div className="flex items-center space-x-4">
-            <div className="p-2.5 bg-indigo-500/10 rounded-xl">
-              <Layers className="w-6 h-6 text-indigo-400" />
+        <div className="px-10 py-8 border-b border-white/[0.04] flex justify-between items-center bg-zinc-900/10 shrink-0">
+          <div className="flex items-center space-x-5">
+            <div className="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+              <Layers className="w-7 h-7 text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-zinc-100 uppercase tracking-widest">Batch Processor</h2>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter mt-0.5">Sequential rendering engine</p>
+              <h2 className="text-base font-black text-zinc-100 uppercase tracking-[0.2em] font-display">Rendering Engine</h2>
+              <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-1 opacity-80">Asynchronous Batch Transformation Studio</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 rounded-xl transition-all" disabled={isProcessing}>
-            <X className="w-6 h-6" />
+          <button onClick={onClose} className="p-3 btn-ghost" disabled={isProcessing}>
+            <X className="w-7 h-7" />
           </button>
         </div>
         
         <div className="flex-1 flex overflow-hidden">
           {/* Left Column: Files */}
-          <div className="w-1/2 border-r border-zinc-800/60 flex flex-col bg-black/20 p-6 overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Job Queue ({files.length})</h3>
+          <div className="w-1/2 border-r border-white/[0.04] flex flex-col bg-black/20 p-8 overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Job Queue <span className="text-indigo-400 ml-2">({files.length})</span></h3>
               <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest hover:text-indigo-300 disabled:opacity-30"
+                className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-indigo-300 disabled:opacity-30 transition-all"
                 disabled={isProcessing}
               >
-                + Append Files
+                + Append Assets
               </button>
             </div>
 
             {files.length === 0 ? (
               <div 
-                className="flex-1 border-2 border-dashed border-zinc-800 rounded-2xl flex flex-col items-center justify-center text-zinc-600 hover:border-zinc-700 hover:text-zinc-500 transition-all cursor-pointer group bg-zinc-900/40"
+                className="flex-1 border-2 border-dashed border-white/[0.03] rounded-3xl flex flex-col items-center justify-center text-zinc-600 hover:border-indigo-500/30 hover:text-zinc-400 transition-all duration-500 cursor-pointer group bg-zinc-900/10"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <UploadCloud className="w-10 h-10 mb-4 group-hover:scale-110 transition-transform text-zinc-700" />
-                <p className="text-[11px] font-bold uppercase tracking-wider">Drop Assets</p>
-                <p className="text-[10px] uppercase tracking-tighter mt-1 opacity-60">or browse filesystem</p>
+                <div className="p-6 rounded-full bg-white/[0.02] mb-6 group-hover:scale-110 group-hover:bg-indigo-500/5 transition-all duration-500">
+                  <UploadCloud className="w-12 h-12 text-zinc-700 group-hover:text-indigo-500/60 transition-colors" />
+                </div>
+                <p className="text-[12px] font-black uppercase tracking-[0.2em]">Ingest Media</p>
+                <p className="text-[10px] uppercase tracking-widest mt-2 opacity-40">Drag and drop or select files</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-3">
                 {files.map((file, i) => {
                   const job = jobs.find(j => j.file === file);
                   return (
-                    <div key={i} className="group flex items-center justify-between bg-zinc-900/60 p-3 rounded-xl border border-zinc-800/40 hover:border-zinc-700 transition-all">
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
-                          <ImageIcon className="w-4 h-4 text-zinc-500" />
+                    <div key={i} className="group flex items-center justify-between bg-zinc-900/30 p-4 rounded-2xl border border-white/[0.02] hover:border-white/[0.08] transition-all duration-300">
+                      <div className="flex items-center space-x-4 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0 border border-white/[0.03]">
+                          <ImageIcon className="w-5 h-5 text-zinc-600" />
                         </div>
-                        <span className="text-[11px] text-zinc-300 truncate font-medium">{file.name}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[12px] text-zinc-200 truncate font-bold">{file.name}</span>
+                          <span className="text-[9px] text-zinc-500 uppercase font-black tracking-widest">{(file.size / 1024).toFixed(1)} KB</span>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-3 shrink-0">
+                      <div className="flex items-center space-x-4 shrink-0">
                         {job && (
-                          <div className={`flex items-center space-x-1.5 px-2 py-1 rounded-md ${
-                            job.status === 'done' ? 'bg-emerald-500/10 text-emerald-400' :
-                            job.status === 'processing' ? 'bg-indigo-500/10 text-indigo-400' :
-                            job.status === 'error' ? 'bg-rose-500/10 text-rose-400' :
-                            'bg-zinc-800 text-zinc-500'
+                          <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border ${
+                            job.status === 'done' ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' :
+                            job.status === 'processing' ? 'bg-indigo-500/5 border-indigo-500/20 text-indigo-400' :
+                            job.status === 'error' ? 'bg-rose-500/5 border-rose-500/20 text-rose-400' :
+                            'bg-zinc-900 border-white/5 text-zinc-600'
                           }`}>
-                            {job.status === 'done' && <CheckCircle2 className="w-3 h-3" />}
-                            {job.status === 'processing' && <Loader2 className="w-3 h-3 animate-spin" />}
-                            {job.status === 'error' && <AlertCircle className="w-3 h-3" />}
-                            <span className="text-[9px] font-bold uppercase tracking-widest">{job.status}</span>
+                            {job.status === 'done' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                            {job.status === 'processing' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                            {job.status === 'error' && <AlertCircle className="w-3.5 h-3.5" />}
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{job.status}</span>
                           </div>
                         )}
                         {!isProcessing && (
-                          <button onClick={() => removeFile(i)} className="p-1 text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-all">
-                            <X className="w-3.5 h-3.5" />
+                          <button onClick={() => removeFile(i)} className="p-2 btn-ghost hover:text-rose-400">
+                            <X className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -218,19 +223,19 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           </div>
 
           {/* Right Column: Pipeline */}
-          <div className="w-1/2 flex flex-col bg-[#0c0c0e] p-6 overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Filter Pipeline</h3>
+          <div className="w-1/2 flex flex-col bg-[#0c0c0e] p-8 overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Transformation Pipeline</h3>
               <div className="relative group">
-                <button className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest hover:text-indigo-300 flex items-center space-x-1.5" disabled={isProcessing}>
-                  <Plus className="w-3 h-3" /> <span>Append Step</span>
+                <button className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-indigo-300 flex items-center space-x-2 transition-all" disabled={isProcessing}>
+                  <Plus className="w-4 h-4" /> <span>Add Protocol</span>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-[#121214] border border-zinc-800 rounded-xl shadow-2xl hidden group-hover:block z-10 overflow-hidden">
+                <div className="absolute right-0 mt-3 w-56 glass-panel rounded-2xl shadow-2xl hidden group-hover:block z-50 overflow-hidden animate-in zoom-in-95 duration-200">
                   {(Object.keys(FILTER_CONFIG) as FilterType[]).map(type => (
                     <button 
                       key={type} 
                       onClick={() => addPipelineStep(type)}
-                      className="block w-full text-left px-4 py-3 text-[11px] font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors border-b border-zinc-800/40 last:border-0"
+                      className="block w-full text-left px-5 py-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:bg-indigo-500/10 hover:text-indigo-400 transition-all border-b border-white/[0.03] last:border-0"
                     >
                       {FILTER_CONFIG[type].name}
                     </button>
@@ -240,45 +245,41 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             </div>
 
             {pipeline.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-zinc-600 text-center px-12 border border-dashed border-zinc-800 rounded-2xl bg-black/20">
-                <Layers className="w-8 h-8 mb-4 opacity-20" />
-                <p className="text-[11px] font-medium uppercase tracking-wider opacity-60">No operations defined</p>
-                <p className="text-[10px] uppercase tracking-tighter mt-1 opacity-40">Add filters to construct your transformation pipeline</p>
+              <div className="flex-1 flex flex-col items-center justify-center text-zinc-700 text-center px-16 border-2 border-dashed border-white/[0.03] rounded-3xl bg-zinc-900/5">
+                <div className="p-5 bg-white/[0.01] rounded-3xl mb-6">
+                  <Layers className="w-10 h-10 opacity-20" />
+                </div>
+                <p className="text-[12px] font-black uppercase tracking-[0.2em] opacity-60">Pipeline Latent</p>
+                <p className="text-[10px] uppercase tracking-widest mt-2 opacity-30 leading-relaxed">Sequence filters to establish your automated rendering workflow</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {pipeline.map((step, index) => {
                   const config = FILTER_CONFIG[step.type];
                   return (
-                    <div key={step.id} className="bg-zinc-900/40 border border-zinc-800/60 p-4 rounded-2xl flex flex-col relative group">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-6 h-6 bg-zinc-800 rounded-md flex items-center justify-center text-[10px] font-bold text-zinc-500 font-mono">
-                            0{index + 1}
+                    <div key={step.id} className="premium-card p-6 rounded-[1.5rem] flex flex-col relative group animate-in slide-in-from-right-4 duration-500">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-8 h-8 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center text-[11px] font-black text-indigo-400 font-display">
+                            {index + 1}
                           </div>
-                          <span className="text-[11px] font-bold text-zinc-200 uppercase tracking-widest">{config.name}</span>
+                          <span className="text-[12px] font-black text-zinc-100 uppercase tracking-[0.2em]">{config.name}</span>
                         </div>
                         {!isProcessing && (
-                          <button onClick={() => removePipelineStep(step.id)} className="p-1.5 text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all">
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <button onClick={() => removePipelineStep(step.id)} className="p-2 btn-ghost hover:text-rose-400">
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
                       {config.hasValue && (
-                        <div className="px-2">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-tighter">Intensity</span>
-                            <span className="text-[10px] font-mono text-zinc-300">{step.value}</span>
-                          </div>
-                          <input 
-                            type="range" 
-                            min={config.min} 
-                            max={config.max} 
+                        <div className="px-1">
+                          <Slider 
+                            label="Parameter" 
+                            min={config.min!} 
+                            max={config.max!} 
                             step={config.step || 1}
-                            value={step.value}
-                            onChange={(e) => updatePipelineStep(step.id, Number(e.target.value))}
-                            disabled={isProcessing}
-                            className="w-full h-[2px] bg-zinc-800 rounded-full appearance-none accent-indigo-500"
+                            value={step.value!}
+                            onChange={(val) => updatePipelineStep(step.id, val)}
                           />
                         </div>
                       )}
@@ -291,16 +292,19 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-6 border-t border-zinc-800/60 bg-zinc-900/40 flex items-center justify-between shrink-0">
-          <div className="w-1/2 pr-8">
+        <div className="px-10 py-8 border-t border-white/[0.04] bg-zinc-900/10 flex items-center justify-between shrink-0">
+          <div className="w-1/2 pr-12">
             {jobs.length > 0 && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
-                  <span>Engine status: {isProcessing ? 'Active' : 'Completed'}</span>
-                  <span>{completed} / {jobs.length} Assets</span>
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="flex justify-between text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-3">
+                  <span className="flex items-center space-x-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isProcessing ? 'bg-indigo-500 animate-pulse' : 'bg-emerald-500'}`} />
+                    <span>Engine: {isProcessing ? 'Processing Cluster' : 'Standby'}</span>
+                  </span>
+                  <span>{completed} / {jobs.length} Units Finalized</span>
                 </div>
-                <div className="w-full bg-zinc-800 rounded-full h-[3px] overflow-hidden">
-                  <div className="bg-indigo-500 h-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(99,102,241,0.5)]" style={{ width: `${progress}%` }}></div>
+                <div className="w-full bg-zinc-900 border border-white/[0.03] rounded-full h-[6px] overflow-hidden p-[1px]">
+                  <div className="bg-gradient-to-r from-indigo-600 to-indigo-400 h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(99,102,241,0.4)]" style={{ width: `${progress}%` }}></div>
                 </div>
               </div>
             )}
@@ -308,10 +312,10 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           <button 
             onClick={handleStartBatch}
             disabled={isProcessing || files.length === 0 || pipeline.length === 0}
-            className="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-500/20 transition-all flex items-center space-x-2 active:scale-[0.98]"
+            className="h-14 px-10 btn-primary disabled:opacity-30 disabled:grayscale transition-all flex items-center space-x-3"
           >
-            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            <span>{isProcessing ? 'Executing Pipeline...' : 'Start Job Run'}</span>
+            {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5" />}
+            <span className="text-[12px] font-black uppercase tracking-[0.3em]">{isProcessing ? 'Rendering...' : 'Execute Run'}</span>
           </button>
         </div>
       </div>

@@ -14,42 +14,33 @@ interface SectionProps {
 const Section: React.FC<SectionProps> = ({ title, icon: Icon, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-zinc-800/40">
+    <div className="border-b border-white/[0.04]">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/20 transition-all duration-200"
+        className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-all duration-300"
       >
-        <div className="flex items-center space-x-2.5">
-          <div className={`p-1 rounded-md transition-colors ${isOpen ? 'text-indigo-400 bg-indigo-500/10' : 'text-zinc-500 bg-zinc-800/50'}`}>
-            <Icon className="w-3.5 h-3.5" />
+        <div className="flex items-center space-x-3">
+          <div className={`p-1.5 rounded-lg transition-all duration-500 ${isOpen ? 'text-indigo-400 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.1)]' : 'text-zinc-500 bg-zinc-800/30'}`}>
+            <Icon className="w-4 h-4" />
           </div>
-          <span className="font-semibold text-[11px] uppercase tracking-widest text-zinc-400">{title}</span>
+          <span className={`font-bold text-[11px] uppercase tracking-[0.15em] transition-colors duration-300 ${isOpen ? 'text-zinc-100' : 'text-zinc-500'}`}>{title}</span>
         </div>
-        <div className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          <ChevronDown className="w-3.5 h-3.5 text-zinc-600" />
+        <div className={`transition-transform duration-500 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
+          <ChevronDown className={`w-4 h-4 ${isOpen ? 'text-indigo-400' : 'text-zinc-600'}`} />
         </div>
       </button>
-      {isOpen && (
-        <div className="px-5 pb-5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+      <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="px-5 pb-6 pt-1">
           {children}
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
 export const RightPanel: React.FC = () => {
   const { 
-    currentMatrix, 
-    originalMatrix,
-    filename, 
-    fileSize, 
-    imageWidth, 
-    imageHeight, 
-    zoom,
-    undoStack,
-    undo,
-    resetToOriginal
+    currentMatrix, filename, fileSize, imageWidth, imageHeight, zoom, undoStack, undo, resetToOriginal
   } = useImageStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -63,7 +54,6 @@ export const RightPanel: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Compute stats for luminance
     const lum = histData.l;
     const totalPixels = lum.reduce((a, b) => a + b, 0);
     
@@ -72,31 +62,24 @@ export const RightPanel: React.FC = () => {
       const mean = sum / totalPixels;
       const min = lum.findIndex(val => val > 0);
       let max = 255;
-      for (let i = 255; i >= 0; i--) {
-        if (lum[i] > 0) { max = i; break; }
-      }
+      for (let i = 255; i >= 0; i--) { if (lum[i] > 0) { max = i; break; } }
       const variance = lum.reduce((a, b, i) => a + b * Math.pow(i - mean, 2), 0) / totalPixels;
       const stdDev = Math.sqrt(variance);
-
       setLumStats({ mean, min, max, stdDev });
     }
 
-    // Draw Histogram
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     const drawChannel = (data: number[], color: string) => {
       const normalized = normalizeHistogram(data);
       ctx.fillStyle = color;
       ctx.beginPath();
       ctx.moveTo(0, canvas.height);
-      
       const step = canvas.width / 256;
       for (let i = 0; i < 256; i++) {
         const x = i * step;
         const y = canvas.height - (normalized[i] * canvas.height);
         ctx.lineTo(x, y);
       }
-      
       ctx.lineTo(canvas.width, canvas.height);
       ctx.closePath();
       ctx.fill();
@@ -104,19 +87,16 @@ export const RightPanel: React.FC = () => {
 
     ctx.globalAlpha = 0.5;
     ctx.globalCompositeOperation = 'screen';
-    
     drawChannel(histData.r, '#ef4444');
     drawChannel(histData.g, '#22c55e');
     drawChannel(histData.b, '#3b82f6');
     drawChannel(histData.l, '#ffffff');
-    
     ctx.globalAlpha = 1.0;
     ctx.globalCompositeOperation = 'source-over';
-
   }, [currentMatrix]);
 
   const formatSize = (bytes: number | null) => {
-    if (bytes == null) return 'Unknown';
+    if (bytes == null) return '—';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -124,86 +104,92 @@ export const RightPanel: React.FC = () => {
 
   const handleHistoryClick = (index: number) => {
     let times = index + 1;
-    while (times > 0) {
-      undo();
-      times--;
-    }
+    while (times > 0) { undo(); times--; }
   };
 
   const handleReset = () => {
-    if (window.confirm('Reset image to original state? All current edits will be lost.')) {
+    if (window.confirm('Reset image to original state? All edits will be lost.')) {
       resetToOriginal();
     }
   };
 
   return (
-    <div className="w-[280px] h-full bg-[#0c0c0e] border-l border-zinc-800/60 flex flex-col overflow-y-auto shrink-0 z-10">
+    <div className="w-[300px] h-full bg-[#0c0c0e] border-l border-white/5 flex flex-col overflow-y-auto shrink-0 z-10 custom-scrollbar">
       <Section title="Histogram" icon={Activity} defaultOpen={true}>
-        <div className="bg-black/40 rounded-lg border border-zinc-800/50 overflow-hidden mb-4 flex items-center justify-center p-2">
+        <div className="premium-card rounded-xl overflow-hidden mb-6 p-3">
           <canvas ref={canvasRef} width={240} height={100} className="w-full h-[100px]" />
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] font-mono tabular-nums">
-          <div className="flex justify-between border-b border-zinc-800/40 pb-1"><span className="text-zinc-500 uppercase">Mean</span> <span className="text-zinc-200">{lumStats.mean.toFixed(1)}</span></div>
-          <div className="flex justify-between border-b border-zinc-800/40 pb-1"><span className="text-zinc-500 uppercase">Sdev</span> <span className="text-zinc-200">{lumStats.stdDev.toFixed(1)}</span></div>
-          <div className="flex justify-between border-b border-zinc-800/40 pb-1"><span className="text-zinc-500 uppercase">Min</span> <span className="text-zinc-200">{lumStats.min}</span></div>
-          <div className="flex justify-between border-b border-zinc-800/40 pb-1"><span className="text-zinc-500 uppercase">Max</span> <span className="text-zinc-200">{lumStats.max}</span></div>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { label: 'Mean', value: lumStats.mean.toFixed(1) },
+            { label: 'StdDev', value: lumStats.stdDev.toFixed(1) },
+            { label: 'Min', value: lumStats.min },
+            { label: 'Max', value: lumStats.max }
+          ].map((stat, i) => (
+            <div key={i} className="flex flex-col border-b border-white/[0.03] pb-2">
+              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">{stat.label}</span>
+              <span className="text-xs font-mono font-bold text-indigo-400">{stat.value}</span>
+            </div>
+          ))}
         </div>
       </Section>
 
-      <Section title="Metadata" icon={Info} defaultOpen={true}>
-        <div className="space-y-4 text-[11px]">
+      <Section title="Image Detail" icon={Info} defaultOpen={true}>
+        <div className="space-y-5">
           <div className="flex flex-col">
-            <span className="text-zinc-500 uppercase tracking-widest text-[9px] mb-1 font-bold">Filename</span>
-            <span className="text-zinc-200 truncate font-medium" title={filename || 'Untitled project'}>{filename || 'Untitled project'}</span>
+            <span className="text-zinc-500 uppercase tracking-[0.2em] text-[9px] mb-1.5 font-black">Source File</span>
+            <span className="text-zinc-100 truncate font-bold text-[11px] bg-zinc-900/50 p-2 rounded-lg border border-white/[0.03]" title={filename || 'Unsaved Project'}>
+              {filename || 'Unsaved Project'}
+            </span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div className="flex flex-col">
-              <span className="text-zinc-500 uppercase tracking-widest text-[9px] mb-1 font-bold">Dimensions</span>
-              <span className="text-zinc-200 font-mono">{currentMatrix ? `${imageWidth}×${imageHeight}` : '—'}</span>
+              <span className="text-zinc-500 uppercase tracking-[0.2em] text-[9px] mb-1 font-black">Resolution</span>
+              <span className="text-zinc-200 font-mono font-bold text-xs">{currentMatrix ? `${imageWidth} × ${imageHeight}` : '—'}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-zinc-500 uppercase tracking-widest text-[9px] mb-1 font-bold">Size</span>
-              <span className="text-zinc-200 font-mono">{formatSize(fileSize)}</span>
+              <span className="text-zinc-500 uppercase tracking-[0.2em] text-[9px] mb-1 font-black">File Size</span>
+              <span className="text-zinc-200 font-mono font-bold text-xs">{formatSize(fileSize)}</span>
             </div>
           </div>
-          <div className="flex justify-between items-center pt-2 border-t border-zinc-800/40">
-            <span className="text-zinc-500 uppercase tracking-widest text-[9px] font-bold">Zoom Level</span>
-            <span className="text-indigo-400 font-mono font-bold">{Math.round(zoom * 100)}%</span>
+          <div className="flex justify-between items-center pt-4 border-t border-white/[0.05]">
+            <span className="text-zinc-500 uppercase tracking-[0.2em] text-[9px] font-black">Magnification</span>
+            <span className="text-indigo-400 font-mono font-black text-xs bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">{Math.round(zoom * 100)}%</span>
           </div>
         </div>
       </Section>
 
-      <Section title="Workflow" icon={HistoryIcon} defaultOpen={true}>
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{undoStack.length} Operations</span>
-          <Tooltip content="Reset to Original">
+      <Section title="Modification Log" icon={HistoryIcon} defaultOpen={true}>
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-zinc-900/80 px-2 py-1 rounded-md border border-white/5">{undoStack.length} Operations</span>
+          <Tooltip content="Purge History">
             <button 
               onClick={handleReset}
               disabled={undoStack.length === 0}
-              className={`p-1.5 rounded-lg transition-all ${undoStack.length > 0 ? 'text-rose-400 hover:bg-rose-500/10' : 'text-zinc-700 cursor-not-allowed'}`}
+              className={`p-2 rounded-xl transition-all duration-300 ${undoStack.length > 0 ? 'text-rose-400 hover:bg-rose-500/10' : 'text-zinc-800 cursor-not-allowed'}`}
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </Tooltip>
         </div>
         
-        <div className="space-y-1 max-h-[240px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
           {undoStack.length === 0 ? (
-            <div className="text-[11px] text-zinc-600 text-center py-8 italic border border-dashed border-zinc-800/60 rounded-lg">No modifications recorded</div>
+            <div className="text-[10px] text-zinc-600 text-center py-12 font-medium uppercase tracking-[0.2em] border-2 border-dashed border-white/[0.03] rounded-2xl">Buffer Empty</div>
           ) : (
             [...undoStack].reverse().map((op, i) => (
               <button 
                 key={i}
                 onClick={() => handleHistoryClick(i)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg transition-all flex items-center group relative overflow-hidden ${i === 0 ? 'bg-indigo-500/10 border border-indigo-500/20' : 'hover:bg-zinc-800/50 border border-transparent'}`}
+                className={`w-full text-left px-4 py-3.5 rounded-2xl transition-all duration-300 flex items-center group relative overflow-hidden border ${i === 0 ? 'bg-indigo-500/10 border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.05)]' : 'hover:bg-white/[0.03] border-transparent'}`}
               >
                 {i === 0 && <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500" />}
                 <div className="flex-1 min-w-0">
-                  <div className={`text-[11px] font-bold truncate ${i === 0 ? 'text-indigo-400' : 'text-zinc-300 group-hover:text-zinc-100'}`}>
-                    {op.name.toUpperCase()}
+                  <div className={`text-[10px] font-black uppercase tracking-widest truncate ${i === 0 ? 'text-indigo-400' : 'text-zinc-300 group-hover:text-white'}`}>
+                    {op.name}
                   </div>
-                  <div className="text-[9px] text-zinc-500 uppercase tracking-tighter mt-0.5">
-                    {i === 0 ? 'Current State' : `${i} action${i !== 1 ? 's' : ''} ago`}
+                  <div className="text-[9px] text-zinc-600 font-bold uppercase tracking-tighter mt-1 group-hover:text-zinc-400">
+                    {i === 0 ? 'Current State' : `${i} action${i !== 1 ? 's' : ''} prior`}
                   </div>
                 </div>
               </button>

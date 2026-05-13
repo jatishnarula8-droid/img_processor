@@ -50,11 +50,9 @@ export const CanvasContainer: React.FC<{ showOriginal?: boolean }> = ({ showOrig
           </div>
         </div>
       ) : (
-        <div className="relative w-full h-full p-8 flex items-center justify-center">
-          <div className="relative w-full h-full max-w-[1400px] max-h-[900px] shadow-2xl shadow-black/50 border border-zinc-800/60 rounded-sm overflow-hidden bg-black">
-            <CanvasViewport showOriginal={showOriginal} />
-            <CropOverlay />
-          </div>
+        <div className="relative w-full h-full">
+          <CanvasViewport showOriginal={showOriginal} />
+          <CropOverlay />
         </div>
       )}
     </div>

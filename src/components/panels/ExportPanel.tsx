@@ -61,118 +61,113 @@ export const ExportPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = (
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
-      <div className="bg-[#121214] border border-zinc-800/60 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col scale-in-95 animate-in duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-500">
+      <div className="bg-[#0c0c0e] border border-white/5 rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col scale-in-95 animate-in duration-500">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-zinc-800/60 flex justify-between items-center bg-zinc-900/40">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-indigo-500/10 rounded-lg">
-              <Download className="w-5 h-5 text-indigo-400" />
+        <div className="px-10 py-8 border-b border-white/[0.04] flex justify-between items-center bg-zinc-900/10">
+          <div className="flex items-center space-x-4">
+            <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+              <Download className="w-6 h-6 text-indigo-400" />
             </div>
-            <h2 className="text-sm font-bold text-zinc-100 uppercase tracking-widest">Export Project</h2>
+            <div className="flex flex-col">
+              <h2 className="text-sm font-black text-zinc-100 uppercase tracking-[0.2em] font-display">Export Studio</h2>
+              <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold mt-1">Configure output parameters</span>
+            </div>
           </div>
-          <button onClick={onClose} className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-all">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-3 btn-ghost">
+            <X className="w-6 h-6" />
           </button>
         </div>
         
-        <div className="p-8 space-y-8">
+        <div className="p-10 space-y-10">
           {/* Filename */}
-          <div className="space-y-3">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block ml-1">Filename</label>
-            <input 
-              type="text" 
-              value={exportName}
-              onChange={(e) => setExportName(e.target.value)}
-              className="w-full bg-black/20 border border-zinc-800 rounded-xl px-4 py-3 text-[13px] text-zinc-100 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium"
-              placeholder="project_name"
-            />
-          </div>
-
-          {/* Format */}
-          <div className="space-y-3">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block ml-1">Format</label>
-            <div className="grid grid-cols-3 gap-2 p-1 bg-black/40 border border-zinc-800/60 rounded-xl">
-              {(['png', 'jpeg', 'webp'] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFormat(f)}
-                  className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${format === f ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Quality */}
-          {format !== 'png' && (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-              <Slider 
-                label="Encoding Quality" 
-                min={1} 
-                max={100} 
-                value={quality} 
-                onChange={setQuality} 
-              />
-            </div>
-          )}
-
-          {/* Scale */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center ml-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Output Scale</label>
-              <span className="text-[10px] font-mono text-indigo-400 font-bold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10">
-                {Math.round(imageWidth * scale)} × {Math.round(imageHeight * scale)} PX
-              </span>
+            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] block ml-1">Asset Name</label>
+            <div className="relative group">
+              <input 
+                type="text" 
+                value={exportName}
+                onChange={(e) => setExportName(e.target.value)}
+                className="w-full bg-zinc-900/40 border border-white/[0.04] rounded-2xl px-5 py-4 text-[14px] text-zinc-100 focus:outline-none focus:border-indigo-500/40 focus:bg-zinc-900/60 transition-all font-medium placeholder-zinc-700"
+                placeholder="untitiled_asset"
+              />
+              <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-600">.{format}</div>
             </div>
-            <div className="grid grid-cols-4 gap-2">
-              {[0.25, 0.5, 0.75, 1].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setScale(s)}
-                  className={`py-2 text-[11px] font-bold rounded-lg border transition-all ${scale === s ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20' : 'bg-black/20 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'}`}
-                >
-                  {s * 100}%
-                </button>
-              ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Format */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] block ml-1">Encoding Format</label>
+              <div className="flex bg-black/40 border border-white/[0.04] rounded-2xl p-1.5">
+                {(['png', 'jpeg', 'webp'] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFormat(f)}
+                    className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${format === f ? 'bg-zinc-800 text-indigo-400 shadow-xl' : 'text-zinc-600 hover:text-zinc-300'}`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Scale */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] block ml-1">Resolution Scale</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[0.25, 0.5, 0.75, 1].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setScale(s)}
+                    className={`py-2.5 text-[10px] font-black rounded-xl border transition-all duration-300 ${scale === s ? 'bg-indigo-600/10 border-indigo-500/40 text-indigo-400' : 'bg-black/20 border-white/[0.02] text-zinc-600 hover:text-zinc-300 hover:border-white/[0.08]'}`}
+                  >
+                    {s * 100}%
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           
-          {/* Estimated Size */}
-          <div className="bg-indigo-500/5 rounded-2xl p-5 border border-indigo-500/10 flex justify-between items-center group overflow-hidden relative">
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform">
-              <Download className="w-16 h-16 text-indigo-400" />
+          {/* Summary / Size */}
+          <div className="premium-card rounded-3xl p-8 flex justify-between items-center group relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-6 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+              <Download className="w-24 h-24 text-indigo-400" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Est. Payload</span>
-              <span className="text-xl font-mono font-bold text-zinc-100 tracking-tighter">
+            <div className="flex flex-col relative z-10">
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Estimated Output Size</span>
+              <span className="text-3xl font-black text-zinc-100 tracking-tighter mt-1 font-display">
                 {estimatedSize === null ? '...' : formatBytes(estimatedSize)}
               </span>
+              <div className="flex items-center space-x-2 mt-2">
+                <span className="text-[9px] font-mono text-indigo-400/60 font-bold bg-indigo-500/5 px-2 py-0.5 rounded border border-indigo-500/10 uppercase tracking-tighter">
+                  {Math.round(imageWidth * scale)} × {Math.round(imageHeight * scale)} PX
+                </span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="text-[9px] font-bold text-indigo-400/60 uppercase tracking-tighter block">Optimized</span>
-              <span className="text-[10px] text-zinc-500 font-mono">READY</span>
+            <div className="text-right relative z-10">
+              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full glow-indigo animate-pulse-soft ml-auto mb-2" />
+              <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">Ready</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-zinc-900/40 border-t border-zinc-800/60 flex flex-col space-y-3">
+        <div className="px-10 py-10 bg-zinc-900/10 border-t border-white/[0.04] flex flex-col space-y-4">
           <button 
             onClick={handleExport}
-            className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center space-x-2"
+            className="w-full py-5 btn-primary flex items-center justify-center space-x-3"
           >
-            <Download className="w-4 h-4" />
-            <span>Confirm Export</span>
+            <Download className="w-5 h-5" />
+            <span className="text-xs font-black uppercase tracking-[0.2em]">Initiate Export</span>
           </button>
           
           <button 
             onClick={handleExportJSON}
-            className="w-full py-3 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all flex items-center justify-center space-x-2 border border-zinc-700/30"
+            className="w-full py-4 btn-secondary flex items-center justify-center space-x-3"
           >
-            <FileJson className="w-3.5 h-3.5" />
-            <span>Download Pipeline (JSON)</span>
+            <FileJson className="w-4 h-4" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Save Manifest (JSON)</span>
           </button>
         </div>
       </div>

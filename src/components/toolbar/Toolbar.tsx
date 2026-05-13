@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, SlidersHorizontal, Wand2, Layers, Download, Undo2, Crop, Sparkles, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  ChevronDown, SlidersHorizontal, Wand2, Layers, Undo2, Crop, Sparkles, Loader2, 
+  RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Maximize, Minus, Plus 
+} from 'lucide-react';
 import { Slider } from '../ui/Slider';
 import { Tooltip } from '../ui/Tooltip';
 import { useImageStore } from '../../store/imageStore';
@@ -18,26 +21,26 @@ interface SectionProps {
 const Section: React.FC<SectionProps> = ({ title, icon: Icon, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-zinc-800/40">
+    <div className="border-b border-white/[0.04]">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/20 transition-all duration-200"
+        className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-all duration-300"
       >
-        <div className="flex items-center space-x-2.5">
-          <div className={`p-1 rounded-md transition-colors ${isOpen ? 'text-indigo-400 bg-indigo-500/10' : 'text-zinc-500 bg-zinc-800/50'}`}>
-            <Icon className="w-3.5 h-3.5" />
+        <div className="flex items-center space-x-3">
+          <div className={`p-1.5 rounded-lg transition-all duration-500 ${isOpen ? 'text-indigo-400 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.1)]' : 'text-zinc-500 bg-zinc-800/30'}`}>
+            <Icon className="w-4 h-4" />
           </div>
-          <span className="font-semibold text-[11px] uppercase tracking-widest text-zinc-400">{title}</span>
+          <span className={`font-bold text-[11px] uppercase tracking-[0.15em] transition-colors duration-300 ${isOpen ? 'text-zinc-100' : 'text-zinc-500'}`}>{title}</span>
         </div>
-        <div className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          <ChevronDown className="w-3.5 h-3.5 text-zinc-600" />
+        <div className={`transition-transform duration-500 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
+          <ChevronDown className={`w-4 h-4 ${isOpen ? 'text-indigo-400' : 'text-zinc-600'}`} />
         </div>
       </button>
-      {isOpen && (
-        <div className="px-5 pb-5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+      <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="px-5 pb-6 pt-1">
           {children}
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -126,102 +129,111 @@ export const Toolbar: React.FC = () => {
   const hasAdjustments = brightness !== 0 || contrast !== 0 || saturation !== 0;
 
   return (
-    <div className="w-[280px] h-full bg-[#0c0c0e] border-r border-zinc-800/60 flex flex-col overflow-y-auto shrink-0 z-10">
-      <div className="p-5 border-b border-zinc-800/60 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-          <h2 className="text-sm font-bold text-zinc-100 tracking-tight">ENGINE</h2>
+    <div className="w-[300px] h-full bg-[#0c0c0e] border-r border-white/5 flex flex-col overflow-y-auto shrink-0 z-10 custom-scrollbar">
+      <div className="p-5 border-b border-white/5 flex justify-between items-center bg-zinc-900/20">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 glow-indigo animate-pulse-soft" />
+          <h2 className="text-[11px] font-black text-zinc-400 tracking-[0.2em] uppercase">Control Engine</h2>
         </div>
-        <Tooltip content="Undo last action">
+        <Tooltip content="Quick Undo">
           <button 
             onClick={undo} 
             disabled={undoStack.length === 0}
-            className={`p-2 rounded-lg transition-all ${undoStack.length > 0 ? 'text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10' : 'text-zinc-700 cursor-not-allowed'}`}
+            className={`p-2 rounded-xl transition-all duration-300 ${undoStack.length > 0 ? 'text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10' : 'text-zinc-800 cursor-not-allowed'}`}
           >
-            <Undo2 className="w-3.5 h-3.5" />
+            <Undo2 className="w-4 h-4" />
           </button>
         </Tooltip>
       </div>
 
       <Section title="Adjustments" icon={SlidersHorizontal} defaultOpen={true}>
-        <div className="mb-6">
-          <Tooltip content="Automatically enhance image using AI">
+        <div className="mb-8">
+          <Tooltip content="Intelligent AI Enhancement">
             <button 
               onClick={autoEnhance}
               disabled={isProcessing || !currentMatrix}
-              className={`w-full py-2.5 flex items-center justify-center space-x-2 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all border ${isProcessing ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400 cursor-wait' : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'}`}
+              className={`w-full py-3.5 btn-primary flex items-center justify-center space-x-2.5 group ${isProcessing ? 'opacity-70 cursor-wait' : ''}`}
             >
               {isProcessing ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform duration-500" />
               )}
-              <span>{isProcessing ? 'Processing...' : 'Auto Enhance'}</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest">{isProcessing ? 'Analyzing...' : 'Auto Enhance'}</span>
             </button>
           </Tooltip>
         </div>
 
-        <Slider 
-          label="Brightness" min={-100} max={100} value={brightness} 
-          onChange={handleBrightnessChange} onReset={() => handleBrightnessChange(0)} 
-        />
-        <Slider 
-          label="Contrast" min={-100} max={100} value={contrast} 
-          onChange={handleContrastChange} onReset={() => handleContrastChange(0)} 
-        />
-        <Slider 
-          label="Saturation" min={-100} max={100} value={saturation} 
-          onChange={handleSaturationChange} onReset={() => handleSaturationChange(0)} 
-        />
+        <div className="space-y-2">
+          <Slider 
+            label="Brightness" min={-100} max={100} value={brightness} 
+            onChange={handleBrightnessChange} onReset={() => handleBrightnessChange(0)} 
+          />
+          <Slider 
+            label="Contrast" min={-100} max={100} value={contrast} 
+            onChange={handleContrastChange} onReset={() => handleContrastChange(0)} 
+          />
+          <Slider 
+            label="Saturation" min={-100} max={100} value={saturation} 
+            onChange={handleSaturationChange} onReset={() => handleSaturationChange(0)} 
+          />
+        </div>
+
         {hasAdjustments && (
-          <div className="flex space-x-2 mt-6 pt-4 border-t border-slate-700/50">
-            <Tooltip content="Discard pending adjustments">
-              <button 
-                onClick={cancelAdjustments}
-                className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-            </Tooltip>
-            <Tooltip content="Permanently apply adjustments to image">
-              <button 
-                onClick={applyAdjustments}
-                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded transition-colors cursor-pointer"
-              >
-                Apply
-              </button>
-            </Tooltip>
+          <div className="flex space-x-3 mt-8 pt-6 border-t border-white/[0.05] animate-in fade-in zoom-in-95 duration-300">
+            <button 
+              onClick={cancelAdjustments}
+              className="flex-1 py-2.5 btn-secondary text-[11px] uppercase tracking-wider font-bold"
+            >
+              Discard
+            </button>
+            <button 
+              onClick={applyAdjustments}
+              className="flex-1 py-2.5 btn-primary text-[11px] uppercase tracking-wider font-bold"
+            >
+              Apply
+            </button>
           </div>
         )}
       </Section>
 
-      <Section title="Transforms" icon={Layers} defaultOpen={true}>
-        <div className="space-y-4">
+      <Section title="Geometry" icon={Layers} defaultOpen={true}>
+        <div className="space-y-6">
           <div>
-            <Tooltip content="Toggle cropping mode">
+            <Tooltip content="Freeform Crop">
               <button 
                 onClick={toggleCropping}
-                className={`w-full py-2.5 flex items-center justify-center space-x-2 text-[11px] font-semibold uppercase tracking-wider rounded-lg transition-all ${isCropping ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/50'}`}
+                className={`w-full py-3 flex items-center justify-center space-x-2.5 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 border ${isCropping ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'btn-secondary'}`}
               >
-                <Crop className="w-3.5 h-3.5" />
-                <span>{isCropping ? 'Cancel Crop' : 'Crop Area'}</span>
+                <Crop className="w-4 h-4" />
+                <span>{isCropping ? 'Exit Crop' : 'Crop Image'}</span>
               </button>
             </Tooltip>
           </div>
           
-          <div className="pt-3 border-t border-zinc-800/40">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Orientation</label>
-            <div className="grid grid-cols-4 gap-2">
-              <Tooltip content="90° CW"><button onClick={() => applyFilter((m) => rotateMatrix(m, 90), 'Rotate 90 CW')} className="aspect-square flex items-center justify-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg border border-zinc-700/50 transition-all text-[10px]">90°</button></Tooltip>
-              <Tooltip content="90° CCW"><button onClick={() => applyFilter((m) => rotateMatrix(m, 270), 'Rotate 90 CCW')} className="aspect-square flex items-center justify-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg border border-zinc-700/50 transition-all text-[10px]">-90°</button></Tooltip>
-              <Tooltip content="180°"><button onClick={() => applyFilter((m) => rotateMatrix(m, 180), 'Rotate 180')} className="aspect-square flex items-center justify-center bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-lg border border-zinc-700/50 transition-all text-[10px]">180°</button></Tooltip>
-              <Tooltip content="Free Rotation"><button onClick={() => setShowFreeRotate(!showFreeRotate)} className={`aspect-square flex items-center justify-center rounded-lg border transition-all text-[10px] ${showFreeRotate ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 border-zinc-700/50'}`}>Free</button></Tooltip>
+          <div className="pt-4">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block">Rotation & Orientation</label>
+            <div className="grid grid-cols-3 gap-2.5">
+              {[
+                { label: '90° CW', icon: RotateCw, fn: () => rotateMatrix(currentMatrix!, 90), name: 'Rotate 90° CW' },
+                { label: '90° CCW', icon: RotateCcw, fn: () => rotateMatrix(currentMatrix!, 270), name: 'Rotate 90° CCW' },
+                { label: 'Free', icon: Maximize, isFree: true }
+              ].map((item, idx) => (
+                <Tooltip key={idx} content={item.label}>
+                  <button 
+                    onClick={() => item.isFree ? setShowFreeRotate(!showFreeRotate) : applyFilter(item.fn!, item.name!)} 
+                    className={`aspect-square flex items-center justify-center btn-secondary group ${item.isFree && showFreeRotate ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-400' : ''}`}
+                  >
+                    {item.icon && <item.icon className={`w-4 h-4 group-hover:scale-110 transition-transform duration-300 ${item.className || ''}`} />}
+                  </button>
+                </Tooltip>
+              ))}
             </div>
             
             {showFreeRotate && (
-              <div className="mt-3 p-3 bg-slate-900 rounded-md border border-slate-700">
+              <div className="mt-4 p-4 premium-card rounded-xl animate-in slide-in-from-top-2 duration-300">
                 <Slider 
-                  label="Angle" min={-180} max={180} value={freeRotateAngle} 
+                  label="Free Angle" min={-180} max={180} value={freeRotateAngle} 
                   onChange={(val) => {
                     setFreeRotateAngle(val);
                     if (currentMatrix) setPreview(rotateMatrix(currentMatrix, val));
@@ -231,85 +243,90 @@ export const Toolbar: React.FC = () => {
                     setPreview(null);
                   }} 
                 />
-                <div className="flex space-x-2 mt-3">
-                  <Tooltip content="Cancel free rotation">
-                    <button 
-                      onClick={() => {
-                        setFreeRotateAngle(0);
-                        setPreview(null);
-                        setShowFreeRotate(false);
-                      }}
-                      className="flex-1 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </Tooltip>
-                  <Tooltip content="Apply rotation to image">
-                    <button 
-                      onClick={() => {
-                        applyFilter((m) => rotateMatrix(m, freeRotateAngle), `Rotate ${freeRotateAngle}°`);
-                        setFreeRotateAngle(0);
-                        setPreview(null);
-                        setShowFreeRotate(false);
-                      }}
-                      className="flex-1 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded transition-colors"
-                    >
-                      Apply
-                    </button>
-                  </Tooltip>
+                <div className="flex space-x-2 mt-4">
+                  <button 
+                    onClick={() => { setFreeRotateAngle(0); setPreview(null); setShowFreeRotate(false); }}
+                    className="flex-1 py-2 btn-secondary text-[10px] uppercase font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => {
+                      applyFilter((m) => rotateMatrix(m, freeRotateAngle), `Rotate ${freeRotateAngle}°`);
+                      setFreeRotateAngle(0); setPreview(null); setShowFreeRotate(false);
+                    }}
+                    className="flex-1 py-2 btn-primary text-[10px] uppercase font-bold"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
             )}
           </div>
           
-          <div className="pt-2 border-t border-slate-700/50">
-            <label className="text-xs font-semibold text-slate-400 mb-2 block">Flip</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Tooltip content="Flip left to right"><button onClick={() => applyFilter(flipHorizontal, 'Flip Horizontal')} className="w-full py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded transition-colors">Horizontal</button></Tooltip>
-              <Tooltip content="Flip top to bottom"><button onClick={() => applyFilter(flipVertical, 'Flip Vertical')} className="w-full py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded transition-colors">Vertical</button></Tooltip>
+          <div className="pt-2">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block">Reflections</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={() => applyFilter(flipHorizontal, 'Flip Horizontal')} className="w-full py-3 btn-secondary flex items-center justify-center space-x-2 group">
+                <FlipHorizontal className="w-4 h-4 group-hover:scale-x-[-1] transition-transform duration-500" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Horizontal</span>
+              </button>
+              <button onClick={() => applyFilter(flipVertical, 'Flip Vertical')} className="w-full py-3 btn-secondary flex items-center justify-center space-x-2 group">
+                <FlipVertical className="w-4 h-4 group-hover:scale-y-[-1] transition-transform duration-500" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Vertical</span>
+              </button>
             </div>
           </div>
         </div>
       </Section>
 
-      <Section title="Filters" icon={Wand2} defaultOpen={true}>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            <Tooltip content="Sharpen"><button onClick={() => applyFilter(applySharpen, 'Sharpen')} className="py-2.5 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 text-[11px] font-medium rounded-lg border border-zinc-700/50 transition-all">Sharpen</button></Tooltip>
-            <Tooltip content="Blur"><button onClick={() => applyFilter((m) => applyGaussianBlur(m, blurIntensity), 'Blur')} className="py-2.5 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 text-[11px] font-medium rounded-lg border border-zinc-700/50 transition-all">Gaussian Blur</button></Tooltip>
-            <Tooltip content="Edge Detection"><button onClick={() => applyFilter(applyEdgeDetection, 'Edge Detect')} className="py-2.5 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 text-[11px] font-medium rounded-lg border border-zinc-700/50 transition-all">Edges</button></Tooltip>
-            <Tooltip content="Emboss"><button onClick={() => applyFilter(applyEmboss, 'Emboss')} className="py-2.5 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 text-[11px] font-medium rounded-lg border border-zinc-700/50 transition-all">Emboss</button></Tooltip>
+      <Section title="FX Filters" icon={Wand2} defaultOpen={true}>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { name: 'Sharpen', icon: Plus, fn: applySharpen },
+              { name: 'Blur', icon: Minus, fn: (m: PixelMatrix) => applyGaussianBlur(m, blurIntensity) },
+              { name: 'Edges', icon: Layers, fn: applyEdgeDetection },
+              { name: 'Emboss', icon: Maximize, fn: applyEmboss }
+            ].map((f, idx) => (
+              <button 
+                key={idx}
+                onClick={() => applyFilter(f.fn, f.name)} 
+                className="w-full py-3 btn-secondary flex items-center justify-center space-x-2 group"
+              >
+                <f.icon className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">{f.name}</span>
+              </button>
+            ))}
           </div>
           
-          <div className="pt-3 border-t border-zinc-800/40">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3 block">Blur Strength</label>
-            <div className="flex bg-black/40 rounded-lg p-1 border border-zinc-800/50">
+          <div className="pt-4 border-t border-white/[0.04]">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 block">Blur Intensity</label>
+            <div className="flex bg-black/40 rounded-xl p-1 border border-white/[0.04]">
               {(['small', 'medium', 'large'] as const).map((level) => (
-                <Tooltip key={level} content={`${level} kernel`}>
-                  <button
-                    onClick={() => setBlurIntensity(level)}
-                    className={`flex-1 text-[10px] font-semibold uppercase tracking-wider py-1.5 rounded-md transition-all ${blurIntensity === level ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
-                  >
-                    {level}
-                  </button>
-                </Tooltip>
+                <button
+                  key={level}
+                  onClick={() => setBlurIntensity(level)}
+                  className={`flex-1 text-[10px] font-bold uppercase tracking-[0.1em] py-2 rounded-lg transition-all duration-300 ${blurIntensity === level ? 'bg-zinc-800 text-indigo-400 shadow-xl' : 'text-zinc-500 hover:text-zinc-300'}`}
+                >
+                  {level}
+                </button>
               ))}
             </div>
           </div>
           
-          <div className="pt-2 border-t border-slate-700/50">
+          <div className="pt-2 border-t border-white/[0.04]">
             <Slider 
               label="Unsharp Mask" min={0} max={2} step={0.1} value={unsharpMaskStrength} 
               onChange={setUnsharpMaskStrength} onReset={() => setUnsharpMaskStrength(1)} 
             />
-            <Tooltip content="Apply Unsharp Mask">
-              <button 
-                onClick={() => applyFilter((m) => applyUnsharpMask(m, unsharpMaskStrength), 'Unsharp Mask')}
-                className="w-full mt-2 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium rounded transition-colors"
-              >
-                Apply Unsharp Mask
-              </button>
-            </Tooltip>
+            <button 
+              onClick={() => applyFilter((m) => applyUnsharpMask(m, unsharpMaskStrength), 'Unsharp Mask')}
+              className="w-full mt-2 py-3 btn-secondary text-[11px] font-bold uppercase tracking-widest flex items-center justify-center space-x-2"
+            >
+              <Wand2 className="w-3.5 h-3.5" />
+              <span>Apply Mask</span>
+            </button>
           </div>
         </div>
       </Section>

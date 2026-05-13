@@ -45,70 +45,73 @@ export default function App() {
   return (
     <div className="flex h-screen bg-[#09090b] text-zinc-100 overflow-hidden font-sans selection:bg-indigo-500/30">
       {/* Accent top border */}
-      <div className="fixed top-0 left-0 right-0 h-[1px] bg-indigo-500/40 z-50" />
+      <div className="fixed top-0 left-0 right-0 h-[1px] bg-indigo-500/30 z-50 animate-pulse-soft" />
       
       <Toolbar />
       
-      <main className="flex-1 flex flex-col relative min-w-0 bg-[#0c0c0e]">
+      <main className="flex-1 flex flex-col relative min-w-0 bg-[#070708]">
         {/* Top Header */}
-        <header className="h-14 border-b border-zinc-800/60 bg-[#09090b]/80 backdrop-blur-md flex items-center justify-between px-6 z-20">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-3">
-              <div className="p-1.5 bg-indigo-500/10 rounded-lg">
-                <Layers className="w-4 h-4 text-indigo-400" />
+        <header className="h-16 border-b border-white/[0.04] bg-[#09090b]/90 backdrop-blur-xl flex items-center justify-between px-8 z-20">
+          <div className="flex items-center space-x-10">
+            <div className="flex items-center space-x-3.5 group cursor-default">
+              <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20 group-hover:border-indigo-500/40 transition-all duration-500">
+                <Layers className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform duration-500" />
               </div>
-              <span className="text-[13px] font-semibold tracking-tight text-zinc-200">PixelCraft <span className="text-zinc-500 font-normal text-[11px] ml-1 uppercase tracking-widest">Pro</span></span>
+              <div className="flex flex-col leading-none">
+                <span className="text-[15px] font-black tracking-tight text-zinc-100 font-display">PixelCraft</span>
+                <span className="text-indigo-400 font-black text-[9px] uppercase tracking-[0.3em] mt-1 opacity-80">Studio Pro</span>
+              </div>
             </div>
             
-            <nav className="h-6 w-[1px] bg-zinc-800" />
+            <div className="h-8 w-[1px] bg-white/[0.06]" />
             
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               <Tooltip content="Undo (Ctrl+Z)">
-                <button onClick={undo} disabled={undoStack.length === 0} className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                <button onClick={undo} disabled={undoStack.length === 0} className="p-2.5 btn-ghost disabled:opacity-20 disabled:cursor-not-allowed">
                   <Undo2 className="w-4 h-4" />
                 </button>
               </Tooltip>
               <Tooltip content="Redo (Ctrl+Shift+Z)">
-                <button onClick={redo} disabled={redoStack.length === 0} className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                <button onClick={redo} disabled={redoStack.length === 0} className="p-2.5 btn-ghost disabled:opacity-20 disabled:cursor-not-allowed">
                   <Redo2 className="w-4 h-4" />
                 </button>
               </Tooltip>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {currentMatrix && (
-              <Tooltip content="Compare with original">
+              <Tooltip content="Hold to see original">
                 <button 
                   onMouseDown={() => setShowOriginal(true)}
                   onMouseUp={() => setShowOriginal(false)}
                   onMouseLeave={() => setShowOriginal(false)}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${showOriginal ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}
+                  className={`flex items-center space-x-2.5 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all duration-300 border ${showOriginal ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/40' : 'btn-secondary'}`}
                 >
-                  <SplitSquareHorizontal className="w-3.5 h-3.5" />
+                  <SplitSquareHorizontal className="w-4 h-4" />
                   <span>Compare</span>
                 </button>
               </Tooltip>
             )}
 
-            <div className="h-4 w-[1px] bg-zinc-800 mx-2" />
+            <div className="h-6 w-[1px] bg-white/[0.06] mx-1" />
 
-            <Tooltip content="Batch process multiple images">
+            <Tooltip content="Process multiple images">
               <button 
                 onClick={() => setBatchPanelOpen(true)}
-                className="flex items-center space-x-2 px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-[11px] font-semibold transition-all border border-zinc-700/50"
+                className="flex items-center space-x-2.5 px-5 py-2.5 btn-secondary text-[11px] font-bold uppercase tracking-widest"
               >
-                <ImageIcon className="w-3.5 h-3.5" />
+                <ImageIcon className="w-4 h-4 text-zinc-400" />
                 <span>Batch</span>
               </button>
             </Tooltip>
 
-            <Tooltip content="Export final image">
+            <Tooltip content="Save high-quality output">
               <button 
                 onClick={() => setExportPanelOpen(true)}
-                className="flex items-center space-x-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-bold transition-all shadow-lg shadow-indigo-500/20"
+                className="flex items-center space-x-2.5 px-6 py-2.5 btn-primary text-[11px] font-bold uppercase tracking-widest"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
             </Tooltip>

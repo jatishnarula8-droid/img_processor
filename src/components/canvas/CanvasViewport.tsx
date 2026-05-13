@@ -58,7 +58,7 @@ export const CanvasViewport: React.FC<{ showOriginal?: boolean }> = ({ showOrigi
 
   return (
     <div 
-      className={`w-full h-full relative overflow-hidden bg-slate-900 flex items-center justify-center ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`w-full h-full relative overflow-hidden bg-transparent flex items-center justify-center ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
