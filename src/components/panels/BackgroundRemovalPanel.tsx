@@ -23,13 +23,15 @@ export const BackgroundRemovalPanel: React.FC = () => {
 
   const [error, setError] = useState<string | null>(null);
 
+  const [blurIntensity, setBlurIntensity] = useState(12);
+
   useEffect(() => {
     if (backgroundRemovedImage) {
       updatePreview(backgroundType, customBackgroundColor);
     } else {
       setPreview(null);
     }
-  }, [backgroundType, customBackgroundColor, backgroundRemovedImage]);
+  }, [backgroundType, customBackgroundColor, backgroundRemovedImage, blurIntensity]);
 
   const updatePreview = (bgType: string, color: string) => {
     if (!backgroundRemovedImage) return;
@@ -45,8 +47,20 @@ export const BackgroundRemovalPanel: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = bgType === 'white' ? '#ffffff' : bgType === 'black' ? '#000000' : color;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (bgType === 'blur' && currentMatrix) {
+      const origImageData = matrixToImageData(currentMatrix);
+      const bgCanvas = document.createElement('canvas');
+      bgCanvas.width = canvas.width;
+      bgCanvas.height = canvas.height;
+      bgCanvas.getContext('2d')!.putImageData(origImageData, 0, 0);
+
+      ctx.filter = `blur(${blurIntensity}px)`;
+      ctx.drawImage(bgCanvas, 0, 0);
+      ctx.filter = 'none';
+    } else {
+      ctx.fillStyle = bgType === 'white' ? '#ffffff' : bgType === 'black' ? '#000000' : color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     const fgImageData = matrixToImageData(backgroundRemovedImage);
     const tempCanvas = document.createElement('canvas');
@@ -148,10 +162,11 @@ export const BackgroundRemovalPanel: React.FC = () => {
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { id: 'transparent', label: 'Transparent' },
+                  { id: 'blur', label: 'Blur BG' },
                   { id: 'white', label: 'White' },
                   { id: 'black', label: 'Black' },
-                  { id: 'custom', label: 'Custom' }
-                ].map(opt => (
+                  { id: 'custom', label: 'Custom Color' }
+                ].map((opt, i, arr) => (
                   <button
                     key={opt.id}
                     onClick={() => setBackgroundType(opt.id)}
@@ -159,7 +174,7 @@ export const BackgroundRemovalPanel: React.FC = () => {
                       backgroundType === opt.id 
                         ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-400' 
                         : 'bg-zinc-900 border-white/5 text-zinc-400 hover:bg-zinc-800'
-                    }`}
+                    } ${arr.length % 2 !== 0 && i === arr.length - 1 ? 'col-span-2' : ''}`}
                   >
                     {opt.label}
                   </button>
@@ -174,6 +189,22 @@ export const BackgroundRemovalPanel: React.FC = () => {
                     value={customBackgroundColor}
                     onChange={(e) => setCustomBackgroundColor(e.target.value)}
                     className="flex-1 h-8 bg-transparent border-none rounded cursor-pointer"
+                  />
+                </div>
+              )}
+
+              {backgroundType === 'blur' && (
+                <div className="mt-3 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Blur Intensity</label>
+                    <span className="text-[9px] font-mono text-zinc-400 bg-zinc-800/50 px-1.5 py-0.5 rounded">{blurIntensity}px</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="2" max="30" 
+                    value={blurIntensity}
+                    onChange={(e) => setBlurIntensity(Number(e.target.value))}
+                    className="w-full custom-range"
                   />
                 </div>
               )}
