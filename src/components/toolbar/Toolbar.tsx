@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronDown, SlidersHorizontal, Wand2, Layers, Undo2, Crop, Sparkles, Loader2, 
-  RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Maximize, Minus, Plus, Scissors
+  RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Maximize, Minus, Plus, Scissors, Palette
 } from 'lucide-react';
 import { Slider } from '../ui/Slider';
 import { Tooltip } from '../ui/Tooltip';
 import { useImageStore } from '../../store/imageStore';
 import { applyBrightness, applyContrast, applySaturation } from '../../core/filters/adjustments';
 import { applyGaussianBlur, applySharpen, applyUnsharpMask, applyEdgeDetection, applyEmboss } from '../../core/filters/convolutionFilters';
+import { applyGrayscale, applySepia, applyInvert } from '../../core/filters/colorFilters';
 import { rotateMatrix, flipHorizontal, flipVertical } from '../../core/transforms/geometric';
 import type { PixelMatrix } from '../../types/image.types';
 
@@ -235,7 +236,7 @@ export const Toolbar: React.FC = () => {
                     onClick={() => item.isFree ? setShowFreeRotate(!showFreeRotate) : applyFilter(item.fn!, item.name!)} 
                     className={`aspect-square flex items-center justify-center btn-secondary group ${item.isFree && showFreeRotate ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-400' : ''}`}
                   >
-                    {item.icon && <item.icon className={`w-4 h-4 group-hover:scale-110 transition-transform duration-300 ${item.className || ''}`} />}
+                    {item.icon && <item.icon className={`w-4 h-4 group-hover:scale-110 transition-transform duration-300`} />}
                   </button>
                 </Tooltip>
               ))}
@@ -288,6 +289,25 @@ export const Toolbar: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+      </Section>
+
+      <Section title="Color Filters" icon={Palette} defaultOpen={true}>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { name: 'Grayscale', fn: applyGrayscale },
+            { name: 'Sepia', fn: applySepia },
+            { name: 'Invert', fn: applyInvert }
+          ].map((f, idx) => (
+            <button 
+              key={idx}
+              onClick={() => applyFilter(f.fn, f.name)} 
+              className="w-full py-3 btn-secondary flex items-center justify-center space-x-2 group"
+            >
+              <Palette className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">{f.name}</span>
+            </button>
+          ))}
         </div>
       </Section>
 
