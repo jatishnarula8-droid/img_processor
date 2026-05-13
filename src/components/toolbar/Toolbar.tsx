@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, SlidersHorizontal, Wand2, Layers, Download, Undo2, Crop } from 'lucide-react';
+import { ChevronDown, ChevronRight, SlidersHorizontal, Wand2, Layers, Download, Undo2, Crop, Sparkles, Loader2 } from 'lucide-react';
 import { Slider } from '../ui/Slider';
 import { Tooltip } from '../ui/Tooltip';
 import { useImageStore } from '../../store/imageStore';
@@ -43,7 +43,10 @@ const Section: React.FC<SectionProps> = ({ title, icon: Icon, children, defaultO
 };
 
 export const Toolbar: React.FC = () => {
-  const { currentMatrix, applyOperation, setPreview, undo, undoStack, isCropping, toggleCropping } = useImageStore();
+  const { 
+    currentMatrix, applyOperation, setPreview, undo, undoStack, 
+    isCropping, toggleCropping, autoEnhance, isProcessing 
+  } = useImageStore();
   
   const [brightness, setBrightness] = useState(0);
   const [contrast, setContrast] = useState(0);
@@ -141,6 +144,23 @@ export const Toolbar: React.FC = () => {
       </div>
 
       <Section title="Adjustments" icon={SlidersHorizontal} defaultOpen={true}>
+        <div className="mb-6">
+          <Tooltip content="Automatically enhance image using AI">
+            <button 
+              onClick={autoEnhance}
+              disabled={isProcessing || !currentMatrix}
+              className={`w-full py-2.5 flex items-center justify-center space-x-2 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all border ${isProcessing ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400 cursor-wait' : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'}`}
+            >
+              {isProcessing ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              <span>{isProcessing ? 'Processing...' : 'Auto Enhance'}</span>
+            </button>
+          </Tooltip>
+        </div>
+
         <Slider 
           label="Brightness" min={-100} max={100} value={brightness} 
           onChange={handleBrightnessChange} onReset={() => handleBrightnessChange(0)} 

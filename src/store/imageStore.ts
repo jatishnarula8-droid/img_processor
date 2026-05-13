@@ -31,12 +31,16 @@ interface ImageStoreState {
   toggleExportPanel: () => void;
   toggleBatchPanel: () => void;
   toggleShortcutsPanel: () => void;
+  setExportPanelOpen: (open: boolean) => void;
+  setBatchPanelOpen: (open: boolean) => void;
+  setShortcutsPanelOpen: (open: boolean) => void;
   
   loadImage: (file: File) => Promise<void>;
   applyOperation: (name: string, newMatrix: PixelMatrix) => void;
   undo: () => void;
   redo: () => void;
   resetToOriginal: () => void;
+  autoEnhance: () => Promise<void>;
 }
 
 export const useImageStore = create<ImageStoreState>((set, get) => ({
@@ -65,6 +69,9 @@ export const useImageStore = create<ImageStoreState>((set, get) => ({
   toggleExportPanel: () => set((state) => ({ isExportPanelOpen: !state.isExportPanelOpen, isBatchPanelOpen: false, isShortcutsPanelOpen: false })),
   toggleBatchPanel: () => set((state) => ({ isBatchPanelOpen: !state.isBatchPanelOpen, isExportPanelOpen: false, isShortcutsPanelOpen: false })),
   toggleShortcutsPanel: () => set((state) => ({ isShortcutsPanelOpen: !state.isShortcutsPanelOpen, isExportPanelOpen: false, isBatchPanelOpen: false })),
+  setExportPanelOpen: (open) => set({ isExportPanelOpen: open, isBatchPanelOpen: false, isShortcutsPanelOpen: false }),
+  setBatchPanelOpen: (open) => set({ isBatchPanelOpen: open, isExportPanelOpen: false, isShortcutsPanelOpen: false }),
+  setShortcutsPanelOpen: (open) => set({ isShortcutsPanelOpen: open, isExportPanelOpen: false, isBatchPanelOpen: false }),
 
   loadImage: async (file: File) => {
     set({ isProcessing: true });
@@ -190,5 +197,28 @@ export const useImageStore = create<ImageStoreState>((set, get) => ({
       pan: { x: 0, y: 0 },
       isCropping: false,
     });
+  },
+
+  autoEnhance: async () => {
+    const { currentMatrix, applyOperation } = get();
+    if (!currentMatrix) return;
+
+    set({ isProcessing: true });
+    
+    // Artificial delay to feel "pro" and ensure UI updates
+    await new Promise(r => setTimeout(r, 600));
+
+    try {
+      // Use local Smart Enhance algorithm (No API required)
+      const { applySmartEnhance } = await import('../core/filters/smartEnhance');
+      const enhancedMatrix = applySmartEnhance(currentMatrix);
+      
+      applyOperation('Auto Enhance (Local)', enhancedMatrix);
+    } catch (error) {
+      console.error('Auto Enhance failed:', error);
+      alert('Local enhancement failed. Please try manual adjustments.');
+    } finally {
+      set({ isProcessing: false });
+    }
   },
 }));
