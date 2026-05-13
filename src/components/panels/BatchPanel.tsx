@@ -5,10 +5,11 @@ import { processBatch, type BatchJob } from '../../core/batchProcessor';
 import { applyBrightness, applyContrast } from '../../core/filters/adjustments';
 import { applyGaussianBlur, applySharpen } from '../../core/filters/convolutionFilters';
 import { flipHorizontal, flipVertical } from '../../core/transforms/geometric';
+import { applyBackgroundRemoval } from '../../core/filters/backgroundRemoval';
 import type { PixelMatrix } from '../../types/image.types';
 import { Tooltip } from '../ui/Tooltip';
 
-type FilterType = 'brightness' | 'contrast' | 'blur' | 'sharpen' | 'grayscale' | 'flipH' | 'flipV';
+type FilterType = 'brightness' | 'contrast' | 'blur' | 'sharpen' | 'grayscale' | 'flipH' | 'flipV' | 'bgRemoval';
 
 interface PipelineStep {
   id: string;
@@ -24,6 +25,7 @@ const FILTER_CONFIG: Record<FilterType, { name: string, hasValue: boolean, defau
   grayscale: { name: 'Grayscale', hasValue: false, default: 0 },
   flipH: { name: 'Flip Horizontal', hasValue: false, default: 0 },
   flipV: { name: 'Flip Vertical', hasValue: false, default: 0 },
+  bgRemoval: { name: 'Remove Background', hasValue: false, default: 0 },
 };
 
 export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
@@ -72,7 +74,7 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     setPipeline(prev => prev.filter(step => step.id !== id));
   };
 
-  const createFilterFn = (step: PipelineStep): (m: PixelMatrix) => PixelMatrix => {
+  const createFilterFn = (step: PipelineStep): (m: PixelMatrix) => PixelMatrix | Promise<PixelMatrix> => {
     switch (step.type) {
       case 'brightness': return (m) => applyBrightness(m, step.value || 0);
       case 'contrast': return (m) => applyContrast(m, step.value || 0);
@@ -94,6 +96,7 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         }
         return out;
       };
+      case 'bgRemoval': return async (m) => await applyBackgroundRemoval(m);
       default: return (m) => m;
     }
   };

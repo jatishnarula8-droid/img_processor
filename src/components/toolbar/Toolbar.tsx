@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronDown, SlidersHorizontal, Wand2, Layers, Undo2, Crop, Sparkles, Loader2, 
-  RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Maximize, Minus, Plus 
+  RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Maximize, Minus, Plus, Scissors
 } from 'lucide-react';
 import { Slider } from '../ui/Slider';
 import { Tooltip } from '../ui/Tooltip';
@@ -48,7 +48,8 @@ const Section: React.FC<SectionProps> = ({ title, icon: Icon, children, defaultO
 export const Toolbar: React.FC = () => {
   const { 
     currentMatrix, applyOperation, setPreview, undo, undoStack, 
-    isCropping, toggleCropping, autoEnhance, isProcessing 
+    isCropping, toggleCropping, autoEnhance, isProcessing,
+    activeTool, setActiveTool
   } = useImageStore();
   
   const [brightness, setBrightness] = useState(0);
@@ -195,6 +196,16 @@ export const Toolbar: React.FC = () => {
             </button>
           </div>
         )}
+      </Section>
+
+      <Section title="AI Tools" icon={Scissors} defaultOpen={false}>
+        <button 
+          onClick={() => setActiveTool(activeTool === 'background_remove' ? null : 'background_remove')}
+          className={`w-full py-3 flex items-center justify-center space-x-2.5 text-[11px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 border ${activeTool === 'background_remove' ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'btn-secondary'}`}
+        >
+          <Scissors className="w-4 h-4" />
+          <span>{activeTool === 'background_remove' ? 'Exit BG Remove' : 'Background Remove'}</span>
+        </button>
       </Section>
 
       <Section title="Geometry" icon={Layers} defaultOpen={true}>

@@ -14,12 +14,30 @@ export const ExportPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = (
   const [scale, setScale] = useState(1);
   const [exportName, setExportName] = useState('');
   const [estimatedSize, setEstimatedSize] = useState<number | null>(null);
+  const [hasAlpha, setHasAlpha] = useState(false);
   
   useEffect(() => {
     if (filename) {
       setExportName(filename.replace(/\.[^/.]+$/, ""));
     }
-  }, [filename]);
+    
+    if (currentMatrix) {
+      let isTransparent = false;
+      // Fast check for transparency
+      outerLoop: for (let y = 0; y < currentMatrix.length; y += Math.max(1, Math.floor(currentMatrix.length / 50))) {
+        for (let x = 0; x < currentMatrix[0].length; x += Math.max(1, Math.floor(currentMatrix[0].length / 50))) {
+          if (currentMatrix[y][x][3] < 255) {
+            isTransparent = true;
+            break outerLoop;
+          }
+        }
+      }
+      setHasAlpha(isTransparent);
+      if (isTransparent) {
+        setFormat('png');
+      }
+    }
+  }, [filename, currentMatrix]);
   
   useEffect(() => {
     if (!currentMatrix || !isOpen) return;
@@ -104,7 +122,8 @@ export const ExportPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                   <button
                     key={f}
                     onClick={() => setFormat(f)}
-                    className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${format === f ? 'bg-zinc-800 text-indigo-400 shadow-xl' : 'text-zinc-600 hover:text-zinc-300'}`}
+                    disabled={hasAlpha && f !== 'png'}
+                    className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${format === f ? 'bg-zinc-800 text-indigo-400 shadow-xl' : 'text-zinc-600 hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed'}`}
                   >
                     {f}
                   </button>

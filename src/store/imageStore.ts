@@ -24,6 +24,17 @@ interface ImageStoreState {
   isBatchPanelOpen: boolean;
   isShortcutsPanelOpen: boolean;
   
+  activeTool: string | null;
+  setActiveTool: (tool: string | null) => void;
+  isRemovingBackground: boolean;
+  setIsRemovingBackground: (isRemoving: boolean) => void;
+  backgroundRemovedImage: PixelMatrix | null;
+  setBackgroundRemovedImage: (image: PixelMatrix | null) => void;
+  backgroundType: string;
+  setBackgroundType: (type: string) => void;
+  customBackgroundColor: string;
+  setCustomBackgroundColor: (color: string) => void;
+  
   setPreview: (matrix: PixelMatrix | null) => void;
   setZoom: (zoom: number | ((prev: number) => number)) => void;
   setPan: (pan: { x: number; y: number } | ((prev: { x: number; y: number }) => { x: number; y: number })) => void;
@@ -61,6 +72,12 @@ export const useImageStore = create<ImageStoreState>((set, get) => ({
   isExportPanelOpen: false,
   isBatchPanelOpen: false,
   isShortcutsPanelOpen: false,
+  
+  activeTool: null,
+  isRemovingBackground: false,
+  backgroundRemovedImage: null,
+  backgroundType: "transparent",
+  customBackgroundColor: "#ffffff",
 
   setPreview: (matrix) => set({ previewMatrix: matrix }),
   setZoom: (zoomOrFn) => set((state) => ({ zoom: typeof zoomOrFn === 'function' ? zoomOrFn(state.zoom) : zoomOrFn })),
@@ -72,6 +89,12 @@ export const useImageStore = create<ImageStoreState>((set, get) => ({
   setExportPanelOpen: (open) => set({ isExportPanelOpen: open, isBatchPanelOpen: false, isShortcutsPanelOpen: false }),
   setBatchPanelOpen: (open) => set({ isBatchPanelOpen: open, isExportPanelOpen: false, isShortcutsPanelOpen: false }),
   setShortcutsPanelOpen: (open) => set({ isShortcutsPanelOpen: open, isExportPanelOpen: false, isBatchPanelOpen: false }),
+
+  setActiveTool: (tool) => set({ activeTool: tool }),
+  setIsRemovingBackground: (isRemoving) => set({ isRemovingBackground: isRemoving }),
+  setBackgroundRemovedImage: (image) => set({ backgroundRemovedImage: image }),
+  setBackgroundType: (type) => set({ backgroundType: type }),
+  setCustomBackgroundColor: (color) => set({ customBackgroundColor: color }),
 
   loadImage: async (file: File) => {
     set({ isProcessing: true });
@@ -110,6 +133,8 @@ export const useImageStore = create<ImageStoreState>((set, get) => ({
         zoom: 1,
         pan: { x: 0, y: 0 },
         isCropping: false,
+        activeTool: null,
+        backgroundRemovedImage: null,
       });
     } catch (error) {
       console.error('Error loading image:', error);

@@ -3,6 +3,7 @@ import { ChevronDown, Activity, Info, History as HistoryIcon, Trash2 } from 'luc
 import { useImageStore } from '../../store/imageStore';
 import { computeHistogram, normalizeHistogram } from '../../core/algorithms/histogram';
 import { Tooltip } from '../ui/Tooltip';
+import { BackgroundRemovalPanel } from './BackgroundRemovalPanel';
 
 interface SectionProps {
   title: string;
@@ -40,7 +41,7 @@ const Section: React.FC<SectionProps> = ({ title, icon: Icon, children, defaultO
 
 export const RightPanel: React.FC = () => {
   const { 
-    currentMatrix, filename, fileSize, imageWidth, imageHeight, zoom, undoStack, undo, resetToOriginal
+    currentMatrix, filename, fileSize, imageWidth, imageHeight, zoom, undoStack, undo, resetToOriginal, activeTool
   } = useImageStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -115,7 +116,11 @@ export const RightPanel: React.FC = () => {
 
   return (
     <div className="w-[300px] h-full bg-[#0c0c0e] border-l border-white/5 flex flex-col overflow-y-auto shrink-0 z-10 custom-scrollbar">
-      <Section title="Histogram" icon={Activity} defaultOpen={true}>
+      {activeTool === 'background_remove' ? (
+        <BackgroundRemovalPanel />
+      ) : (
+        <>
+          <Section title="Histogram" icon={Activity} defaultOpen={true}>
         <div className="premium-card rounded-xl overflow-hidden mb-6 p-3">
           <canvas ref={canvasRef} width={240} height={100} className="w-full h-[100px]" />
         </div>
@@ -197,6 +202,8 @@ export const RightPanel: React.FC = () => {
           )}
         </div>
       </Section>
+        </>
+      )}
     </div>
   );
 };

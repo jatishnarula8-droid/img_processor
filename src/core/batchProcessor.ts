@@ -5,7 +5,7 @@ import { exportAsImage } from './export';
 export interface BatchJob {
   id: string;
   file: File;
-  operations: { name: string; filterFn: (m: PixelMatrix) => PixelMatrix }[];
+  operations: { name: string; filterFn: (m: PixelMatrix) => PixelMatrix | Promise<PixelMatrix> }[];
   format: 'png' | 'jpeg' | 'webp';
   quality: number;
   status: 'pending' | 'processing' | 'done' | 'error';
@@ -29,7 +29,7 @@ export const processBatch = async (
       for (const op of job.operations) {
         // Sleep slightly to let UI breathe
         await new Promise(resolve => setTimeout(resolve, 0));
-        matrix = op.filterFn(matrix);
+        matrix = await op.filterFn(matrix);
       }
       
       // Strip extension from filename
