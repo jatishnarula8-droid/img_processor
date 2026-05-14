@@ -1,13 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { X, UploadCloud, Play, Trash2, Plus, GripVertical, Layers, Loader2, CheckCircle2, AlertCircle, Image as ImageIcon } from 'lucide-react';
-import { useImageStore } from '../../store/imageStore';
+import { X, UploadCloud, Play, Trash2, Plus, Layers, Loader2, CheckCircle2, AlertCircle, Image as ImageIcon } from 'lucide-react';
+// import { useImageStore } from '../../store/imageStore';
 import { processBatch, type BatchJob } from '../../core/batchProcessor';
 import { applyBrightness, applyContrast } from '../../core/filters/adjustments';
 import { applyGaussianBlur, applySharpen } from '../../core/filters/convolutionFilters';
 import { flipHorizontal, flipVertical } from '../../core/transforms/geometric';
 import { applyBackgroundRemoval } from '../../core/filters/backgroundRemoval';
 import type { PixelMatrix } from '../../types/image.types';
-import { Tooltip } from '../ui/Tooltip';
+// Removed unused import
+import { Slider } from '../ui/Slider';
 
 type FilterType = 'brightness' | 'contrast' | 'blur' | 'sharpen' | 'grayscale' | 'flipH' | 'flipV' | 'bgRemoval';
 
@@ -298,7 +299,7 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                             max={config.max!} 
                             step={config.step || 1}
                             value={step.value!}
-                            onChange={(val) => updatePipelineStep(step.id, val)}
+                            onChange={(val: number) => updatePipelineStep(step.id, val)}
                           />
                         </div>
                       )}

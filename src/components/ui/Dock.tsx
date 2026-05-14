@@ -9,7 +9,7 @@ import {
   type SpringOptions,
   AnimatePresence
 } from 'framer-motion';
-import React, { Children, cloneElement, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Children, cloneElement, useEffect, useRef, useState } from 'react';
 
 export type DockItemData = {
   icon: React.ReactNode;
@@ -143,7 +143,6 @@ export default function Dock({
   magnification = 70,
   distance = 200,
   panelHeight = 64,
-  dockHeight = 256,
   baseItemSize = 50
 }: DockProps) {
   const mouseX = useMotionValue(Infinity);

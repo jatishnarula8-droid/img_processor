@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Scissors, CheckCircle2, Loader2, RefreshCw, Palette, Image as ImageIcon } from 'lucide-react';
+import { Scissors, CheckCircle2, Loader2, RefreshCw, Palette } from 'lucide-react';
 import { useImageStore } from '../../store/imageStore';
 import { applyBackgroundRemoval } from '../../core/filters/backgroundRemoval';
 import { matrixToImageData, imageDataToMatrix } from '../../core/algorithms/pixelMatrix';
-import { Tooltip } from '../ui/Tooltip';
+// Removed unused import
 
 export const BackgroundRemovalPanel: React.FC = () => {
   const { 

@@ -2,8 +2,13 @@ import React, { useEffect } from 'react';
 import { X, Command } from 'lucide-react';
 import { useImageStore } from '../../store/imageStore';
 
-export const ShortcutsModal: React.FC = () => {
-  const { isShortcutsPanelOpen, toggleShortcutsPanel } = useImageStore();
+interface ShortcutsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose }) => {
+  const { toggleShortcutsPanel } = useImageStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -20,7 +25,7 @@ export const ShortcutsModal: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [toggleShortcutsPanel]);
 
-  if (!isShortcutsPanelOpen) return null;
+  if (!isOpen) return null;
 
   const shortcuts = [
     { key: 'Ctrl + Z', label: 'Undo last action' },
@@ -40,7 +45,7 @@ export const ShortcutsModal: React.FC = () => {
             <Command className="w-5 h-5 text-blue-500" />
             <span>Keyboard Shortcuts</span>
           </h2>
-          <button onClick={toggleShortcutsPanel} className="text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>

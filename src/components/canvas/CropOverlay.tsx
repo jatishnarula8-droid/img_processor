@@ -102,7 +102,7 @@ export const CropOverlay: React.FC = () => {
   const [activeRatio, setActiveRatio] = useState<number>(0);
   const [rotationAngle, setRotationAngle] = useState<number>(0);
   const { setPreview } = useImageStore.getState();
-  const rotationTimeout = useRef<NodeJS.Timeout | null>(null);
+  const rotationTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (!isCropping || !currentMatrix) return null;
 

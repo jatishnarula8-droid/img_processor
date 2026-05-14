@@ -3,14 +3,13 @@ import { X, Download, FileJson } from 'lucide-react';
 import { useImageStore } from '../../store/imageStore';
 import { computeFileSize, exportAsImage, exportAsJSON } from '../../core/export';
 import { scaleMatrix } from '../../core/transforms/geometric';
-import { Slider } from '../ui/Slider';
-import { Tooltip } from '../ui/Tooltip';
+// Removed unused imports
 
 export const ExportPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const { currentMatrix, filename, undoStack, imageWidth, imageHeight } = useImageStore();
   
   const [format, setFormat] = useState<'png' | 'jpeg' | 'webp'>('png');
-  const [quality, setQuality] = useState(92);
+  const quality = 92; // setQuality is never used
   const [scale, setScale] = useState(1);
   const [exportName, setExportName] = useState('');
   const [estimatedSize, setEstimatedSize] = useState<number | null>(null);

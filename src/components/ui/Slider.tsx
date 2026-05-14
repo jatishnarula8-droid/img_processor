@@ -1,6 +1,6 @@
 import React, { type ChangeEvent } from 'react';
 import { RotateCcw } from 'lucide-react';
-import { Tooltip } from './Tooltip';
+// Removed unused import
 
 interface SliderProps {
   label: string;

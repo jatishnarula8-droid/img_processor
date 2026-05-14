@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   ChevronDown, SlidersHorizontal, Wand2, Layers, Undo2, Crop, Sparkles, Loader2, 
   RotateCw, RotateCcw, FlipHorizontal, FlipVertical, Maximize, Minus, Plus, Scissors, Palette
@@ -50,7 +50,7 @@ export const Toolbar: React.FC = () => {
   const { 
     currentMatrix, applyOperation, setPreview, undo, undoStack, 
     isCropping, toggleCropping, autoEnhance, isProcessing,
-    activeTool, setActiveTool, zoom, setZoom
+    activeTool, setActiveTool
   } = useImageStore();
   
   const [brightness, setBrightness] = useState(0);
