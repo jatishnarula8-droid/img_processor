@@ -33,6 +33,7 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   const [pipeline, setPipeline] = useState<PipelineStep[]>([]);
   const [jobs, setJobs] = useState<BatchJob[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -229,21 +230,36 @@ export const BatchPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           <div className="w-1/2 flex flex-col bg-[#0c0c0e] p-8 overflow-y-auto custom-scrollbar">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Transformation Pipeline</h3>
-              <div className="relative group">
-                <button className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-indigo-300 flex items-center space-x-2 transition-all" disabled={isProcessing}>
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProtocolOpen(!isProtocolOpen)}
+                  className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] hover:text-indigo-300 flex items-center space-x-2 transition-all" 
+                  disabled={isProcessing}
+                >
                   <Plus className="w-4 h-4" /> <span>Add Protocol</span>
                 </button>
-                <div className="absolute right-0 mt-3 w-56 glass-panel rounded-2xl shadow-2xl hidden group-hover:block z-50 overflow-hidden animate-in zoom-in-95 duration-200">
-                  {(Object.keys(FILTER_CONFIG) as FilterType[]).map(type => (
-                    <button 
-                      key={type} 
-                      onClick={() => addPipelineStep(type)}
-                      className="block w-full text-left px-5 py-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:bg-indigo-500/10 hover:text-indigo-400 transition-all border-b border-white/[0.03] last:border-0"
-                    >
-                      {FILTER_CONFIG[type].name}
-                    </button>
-                  ))}
-                </div>
+                {isProtocolOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsProtocolOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-3 w-56 glass-panel rounded-2xl shadow-2xl z-50 overflow-hidden animate-in zoom-in-95 duration-200">
+                      {(Object.keys(FILTER_CONFIG) as FilterType[]).map(type => (
+                        <button 
+                          key={type} 
+                          onClick={() => {
+                            addPipelineStep(type);
+                            setIsProtocolOpen(false);
+                          }}
+                          className="block w-full text-left px-5 py-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:bg-indigo-500/10 hover:text-indigo-400 transition-all border-b border-white/[0.03] last:border-0"
+                        >
+                          {FILTER_CONFIG[type].name}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
